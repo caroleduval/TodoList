@@ -1,0 +1,11 @@
+scenario:
+    options:
+        title: GitList Scenario
+        endpoint: http://gitlist.demo.blackfire.io/
+
+    steps:
+        - title: "Homepage"
+          visit: url('/')
+          expect:
+              - status_code() == 200
+              - header('content_type') matches '/html/'
