@@ -3,6 +3,7 @@
 namespace Tests\AppBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use AppBundle\Entity\Task;
 
 class TaskControllerTest extends WebTestCase
 {
@@ -29,6 +30,9 @@ class TaskControllerTest extends WebTestCase
 
     public function testTaskCreate()
     {
+        $em = $this->kernel->getContainer()->get('doctrine.orm.entity_manager');
+        $TaskRepo=$em->getRepository(Task::class);
+
         $crawler = $this->client->request('GET', '/');
 
         $link = $crawler->selectLink('Consulter la liste des tâches à faire')->link();
@@ -46,18 +50,44 @@ class TaskControllerTest extends WebTestCase
 
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
         $this->assertSame(1, $crawler->filter('div.alert.alert-success')->count());
+
+        $task=$TaskRepo->findOneBy(
+            array(''=>''),
+            array('id'=>'DESC')
+        );
+        $this->assertEquals('username', $task->getAuthor());
     }
 
-    public function testTaskEdit()
+    public function testTaskEditTitle()
     {
         $crawler = $this->client->request('GET', '/');
 
         $link = $crawler->selectLink('Consulter la liste des tâches à faire')->link();
         $crawler = $this->client->click($link);
 
-        $link = $crawler->selectLink('une tâche test')->link();
+        $link = $crawler->selectLink('une tâche test')->last()->link();
         $crawler = $this->client->click($link);
 
+        $form = $crawler->selectButton('Modifier')->form();
+        $form['task[title]'] = 'une tâche modifiée';
+        $form['task[content]'] = 'description';
+        $this->client->submit($form);
+
+        $crawler = $this->client->followRedirect();
+
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+        $this->assertSame(1, $crawler->filter('div.alert.alert-success')->count());
+    }
+
+    public function testTaskEditContent()
+    {
+        $crawler = $this->client->request('GET', '/');
+
+        $link = $crawler->selectLink('Consulter la liste des tâches à faire')->link();
+        $crawler = $this->client->click($link);
+
+        $link = $crawler->selectLink('une tâche test')->last()->link();
+        $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
         $form['task[title]'] = 'une tâche test';
