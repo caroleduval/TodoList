@@ -4,6 +4,7 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\User;
 use AppBundle\Form\UserType;
+use AppBundle\Form\UserEditType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,7 +16,16 @@ class UserController extends Controller
      */
     public function listAction()
     {
-        return $this->render('user/list.html.twig', ['users' => $this->getDoctrine()->getRepository('AppBundle:User')->findAll()]);
+        $user = $this->getUser();
+
+        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+        {
+            return $this->render('user/list.html.twig', ['users' => $this->getDoctrine()->getRepository('AppBundle:User')->findAll()]);
+        }
+        else
+        {
+            return $this->render('user/view.html.twig', ['user' => $this->getDoctrine()->getRepository('AppBundle:User')->find($user->getId())]);
+        }
     }
 
     /**
@@ -23,8 +33,9 @@ class UserController extends Controller
      */
     public function createAction(Request $request)
     {
+        $user_roles = $this->getUser()->getRoles();
         $user = new User();
-        $form = $this->createForm(UserType::class, $user);
+        $form = $this->createForm(UserType::class, $user, array('role' => $user_roles));
 
         $form->handleRequest($request);
 
@@ -49,7 +60,10 @@ class UserController extends Controller
      */
     public function editAction(User $user, Request $request)
     {
-        $form = $this->createForm(UserType::class, $user);
+        $this->denyAccessUnlessGranted('edit', $user);
+
+        $user_roles = $this->getUser()->getRoles();
+        $form = $this->createForm(UserEditType::class, $user, array('role' => $user_roles));
 
         $form->handleRequest($request);
 

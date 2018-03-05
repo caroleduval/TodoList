@@ -12,7 +12,7 @@ class TaskTest extends TestCase
         $task = new Task();
 //        $this->assertSame("", $task->getCreatedAt());
         $task->setCreatedAt("01/01/2018");
-        $this->assertSame("01/01/2018", $task->getCreatedAt());
+        static::assertSame("01/01/2018", $task->getCreatedAt());
     }
 
     public function testSettingTitle()

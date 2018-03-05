@@ -2,13 +2,13 @@ default:
     extensions:
         Behat\Symfony2Extension: ~
         Behat\MinkExtension:
-            base_url: http://127.0.0.1:8000/
+            base_url: http://127.0.0.1:8001/
             show_cmd: 'open %s'
             goutte: ~
-            selenium2:
-                wd_host: http://localhost:4444/wd/hub
-                browser: chrome
-                capabilities: { "platform": 'MAC', "browserName": "chrome", "browser": "chrome", "version": '58',"marionette": null }
+#            selenium2:
+#                wd_host: http://localhost:4444/wd/hub
+#                browser: chrome
+#                capabilities: { "platform": 'MAC', "browserName": "chrome", "browser": "chrome", "version": '64',"marionette": null }
     suites:
         default:
             contexts: [FeatureContext,WebContext]
