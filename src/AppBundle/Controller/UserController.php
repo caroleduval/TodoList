@@ -1,7 +1,5 @@
 <?php
-
 namespace AppBundle\Controller;
-
 use AppBundle\Entity\User;
 use AppBundle\Form\UserType;
 use AppBundle\Form\UserEditType;
@@ -9,7 +7,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
-
 class UserController extends Controller
 {
     /**
@@ -19,7 +16,6 @@ class UserController extends Controller
     public function listAction()
     {
         $user = $this->getUser();
-
         if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
         {
             return $this->render('user/list.html.twig', ['users' => $this->getDoctrine()->getRepository('AppBundle:User')->findAll()]);
@@ -29,7 +25,6 @@ class UserController extends Controller
             return $this->render('user/view.html.twig', ['user' => $this->getDoctrine()->getRepository('AppBundle:User')->find($user->getId())]);
         }
     }
-
     /**
      * @Route("/users/create", name="user_create")
      */
@@ -38,25 +33,18 @@ class UserController extends Controller
         $user_roles = (is_null($this->getUser()))? []:$this->getUser()->getRoles();
         $user = new User();
         $form = $this->createForm(UserType::class, $user, array('role' => $user_roles));
-
         $form->handleRequest($request);
-
         if ($form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $password = $this->get('security.password_encoder')->encodePassword($user, $user->getPassword());
             $user->setPassword($password);
-
             $em->persist($user);
             $em->flush();
-
             $this->addFlash('success', "L'utilisateur a bien été ajouté.");
-
             return $this->redirectToRoute('user_list');
         }
-
         return $this->render('user/create.html.twig', ['form' => $form->createView()]);
     }
-
     /**
      * @Route("/users/{id}/edit", name="user_edit")
      * @Security("has_role('ROLE_USER')")
@@ -64,23 +52,16 @@ class UserController extends Controller
     public function editAction(User $user, Request $request)
     {
         $this->denyAccessUnlessGranted('edit', $user);
-
         $user_roles = $this->getUser()->getRoles();
         $form = $this->createForm(UserEditType::class, $user, array('role' => $user_roles));
-
         $form->handleRequest($request);
-
         if ($form->isValid()) {
             $password = $this->get('security.password_encoder')->encodePassword($user, $user->getPassword());
             $user->setPassword($password);
-
             $this->getDoctrine()->getManager()->flush();
-
             $this->addFlash('success', "L'utilisateur a bien été modifié");
-
             return $this->redirectToRoute('user_list');
         }
-
         return $this->render('user/edit.html.twig', ['form' => $form->createView(), 'user' => $user]);
     }
 }

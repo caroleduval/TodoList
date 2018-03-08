@@ -1,7 +1,5 @@
 <?php
-
 namespace AppBundle\Form;
-
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -10,7 +8,6 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-
 class UserEditType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -25,8 +22,7 @@ class UserEditType extends AbstractType
                 'second_options' => ['label' => 'Tapez le mot de passe à nouveau'],
             ])
             ->add('email', EmailType::class, ['label' => 'Adresse email'])
-            ;
-
+        ;
         if (in_array('ROLE_ADMIN', $options['role'])) {
             $builder->add('roles', ChoiceType::class, array(
                 'label' => 'Droits',
@@ -40,7 +36,6 @@ class UserEditType extends AbstractType
             ));
         }
     }
-
     /**
      * @param OptionsResolver $resolver
      */

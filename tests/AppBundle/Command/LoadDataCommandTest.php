@@ -26,6 +26,6 @@ class LoadDataCommandTest extends KernelTestCase
         $output = $commandTester->getDisplay();
         $this->assertContains('Database schema updated successfully!', $output);
         $this->assertContains('purging database', $output);
-        $this->assertContains('loading AppBundle\DataFixtures\ORM\LoadUser', $output);
+        $this->assertContains('loading AppBundle\DataFixtures\ORM\LoadData', $output);
     }
 }

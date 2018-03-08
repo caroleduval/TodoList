@@ -21,29 +21,30 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->request('GET', '/users');
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(2, $crawler->filter('a:contains("Edit")')->count());
+        static::assertSame(3, $crawler->filter('a:contains("Edit")')->count());
     }
 
-//    public function testAdminCreateAsAdminOK()
-//    {
-//        $crawler = $this->client->request('GET', '/');
-//
-//        $link = $crawler->selectLink('Créer un utilisateur')->link();
-//        $crawler = $this->client->click($link);
-//
-//        $form = $crawler->selectButton('Ajouter')->form();
-//        $form['user[username]'] = 'usertestAdmin';
-//        $form['user[password][first]'] = 'password';
-//        $form['user[password][second]'] = 'password';
-//        $form['user[email]'] = 'admin2@mail.fr';
-//        $form['user[roles]']->select('Administrateur');
-//        $this->client->submit($form);
-//
-//        $crawler = $this->client->followRedirect();
-//
-//        static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-//        static::assertSame(1, $crawler->filter('html:contains("Superbe ! L\'utilisateur a bien été ajouté.") ')->count());
-//    }
+    public function testAdminCreateAsAdminOK()
+    {
+        $crawler = $this->client->request('GET', '/');
+
+        $link = $crawler->selectLink('Créer un utilisateur')->link();
+        $crawler = $this->client->click($link);
+
+        $form = $crawler->selectButton('Ajouter')->form();
+        $form['user[username]'] = 'usertestAdmin';
+        $form['user[password][first]'] = 'password';
+        $form['user[password][second]'] = 'password';
+        $form['user[email]'] = 'admin2@mail.fr';
+        $form['user[roles]'][1]->tick();
+        $this->client->submit($form);
+
+        $crawler = $this->client->followRedirect();
+
+        static::assertEquals(200, $this->client->getResponse()->getStatusCode());
+        static::assertSame(1, $crawler->filter('html:contains("Superbe ! L\'utilisateur a bien été ajouté.") ')->count());
+        static::assertSame(1, $crawler->filter('html:contains("usertestAdmin") ')->count());
+    }
 
     public function testAdminCreateAsUserOK()
     {
@@ -119,22 +120,6 @@ class UserControllerAsAdminTest extends WebTestCase
         static::assertSame(1, $crawler->filter('html:contains("Les deux mots de passe doivent correspondre.") ')->count());
     }
 
-//    public function testAdminEditUsernameOK()
-//    {
-//        $crawler = $this->client->request('GET', '/users');
-//
-//        $link = $crawler->selectLink('Edit')->last()->link();
-//        $crawler = $this->client->click($link);
-//
-//        $form = $crawler->selectButton('Modifier')->form();
-//        $form['user_edit[username]'] = 'usertest modif';
-//        $this->client->submit($form);
-//
-//        $crawler = $this->client->followRedirect();
-//
-//        static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-//        static::assertSame(1, $crawler->filter('html:contains("Superbe ! L\'utilisateur a bien été modifié") ')->count());
-//    }
 
     public function testAdminEditUsernameNOK()
     {
@@ -200,6 +185,23 @@ class UserControllerAsAdminTest extends WebTestCase
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
         static::assertSame(1, $crawler->filter('html:contains("Les deux mots de passe doivent correspondre.") ')->count());
+    }
+
+    public function testAdminEditUsernameOK()
+    {
+        $crawler = $this->client->request('GET', '/users');
+
+        $link = $crawler->selectLink('Edit')->last()->link();
+        $crawler = $this->client->click($link);
+
+        $form = $crawler->selectButton('Modifier')->form();
+        $form['user_edit[username]'] = 'usertest modif';
+        $this->client->submit($form);
+
+        $crawler = $this->client->followRedirect();
+
+        static::assertEquals(200, $this->client->getResponse()->getStatusCode());
+        static::assertSame(1, $crawler->filter('html:contains("Superbe ! L\'utilisateur a bien été modifié") ')->count());
     }
 }
 

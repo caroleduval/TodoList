@@ -9,7 +9,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use AppBundle\Entity\User;
 use AppBundle\Entity\Task;
 
-class LoadUser implements FixtureInterface, ContainerAwareInterface
+class LoadData implements FixtureInterface, ContainerAwareInterface
 {
 
     private $container;
@@ -36,6 +36,12 @@ class LoadUser implements FixtureInterface, ContainerAwareInterface
         $user2->setRoles(['ROLE_USER']);
         $manager->persist($user2);
 
+        $user3 = new User();
+        $user3->setUsername('username');
+        $user3->setPassword('$2y$13$j2tIf6A9Qsph.tVo8bzuFe7Jfr4aAuKj7yNSLmtM2Bh7JvfZQ0n3a');
+        $user3->setEmail('username@email.fr');
+        $user3->setRoles(['ROLE_USER']);
+        $manager->persist($user3);
 
         $data_tasks = array(
             [$user1, '2018-02-13 16:24:30', 'Réaliser le projet', 'Détails de la tâche', false],
