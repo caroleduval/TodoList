@@ -52,12 +52,21 @@ class UserController extends Controller
     public function editAction(User $user, Request $request)
     {
         $this->denyAccessUnlessGranted('edit', $user);
+
         $user_roles = $this->getUser()->getRoles();
         $form = $this->createForm(UserEditType::class, $user, array('role' => $user_roles));
+
+        $originalPassword = $user->getPassword();
+
         $form->handleRequest($request);
         if ($form->isValid()) {
-            $password = $this->get('security.password_encoder')->encodePassword($user, $user->getPassword());
-            $user->setPassword($password);
+            $plainPassword = $form->get('password')->getData();
+            if (!empty($plainPassword)) {
+                $password = $this->get('security.password_encoder')->encodePassword($user, $user->getPassword());
+                $user->setPassword($password);
+            } else {
+                $user->setPassword($originalPassword);
+            }
             $this->getDoctrine()->getManager()->flush();
             $this->addFlash('success', "L'utilisateur a bien été modifié");
             return $this->redirectToRoute('user_list');

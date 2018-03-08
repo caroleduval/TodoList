@@ -99,7 +99,7 @@ class UserControllerAsAnonTest extends WebTestCase
 
     public function testUserEditKO()
     {
-        $crawler = $this->client->request('GET', '/users/1/edit');
+        $this->client->request('GET', '/users/1/edit');
 
         $crawler = $this->client->followRedirect();
 
