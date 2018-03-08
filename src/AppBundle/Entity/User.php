@@ -40,6 +40,17 @@ class User implements UserInterface
      */
     private $email;
 
+    /**
+     * @ORM\Column(name="role", type="json_array")
+     */
+    private $roles = [];
+
+    public function __construct()
+    {
+        $this->roles[] = 'ROLE_USER';
+    }
+
+
     public function getId()
     {
         return $this->id;
@@ -78,6 +89,22 @@ class User implements UserInterface
     public function setEmail($email)
     {
         $this->email = $email;
+    }
+
+    /**
+     * Retourne les rôles de l'user
+     */
+    public function getRoles()
+    {
+        $roles = $this->roles;
+
+        return array_unique($roles);
+    }
+
+    public function setRoles(array $roles)
+    {
+        $this->roles = [];
+        $this->roles = $roles;
     }
 
     public function eraseCredentials()
