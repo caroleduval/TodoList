@@ -96,7 +96,6 @@ class Task
         $this->isDone = $flag;
     }
 
-
     public function getAuthor()
     {
         return $this->author;
@@ -105,5 +104,17 @@ class Task
     public function setAuthor($author)
     {
         $this->author = $author;
+    }
+
+    public function hydrate(array $donnees)
+    {
+        foreach ($donnees as $key => $value)
+        {
+            $method = 'set'.ucfirst($key);
+            if (method_exists($this, $method))
+            {
+                $this->$method($value);
+            }
+        }
     }
 }

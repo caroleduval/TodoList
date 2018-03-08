@@ -6,6 +6,7 @@ use AppBundle\Entity\User;
 use AppBundle\Form\UserType;
 use AppBundle\Form\UserEditType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -13,6 +14,7 @@ class UserController extends Controller
 {
     /**
      * @Route("/users", name="user_list")
+     * @Security("has_role('ROLE_USER')")
      */
     public function listAction()
     {
@@ -33,7 +35,7 @@ class UserController extends Controller
      */
     public function createAction(Request $request)
     {
-        $user_roles = $this->getUser()->getRoles();
+        $user_roles = (is_null($this->getUser()))? []:$this->getUser()->getRoles();
         $user = new User();
         $form = $this->createForm(UserType::class, $user, array('role' => $user_roles));
 
@@ -57,6 +59,7 @@ class UserController extends Controller
 
     /**
      * @Route("/users/{id}/edit", name="user_edit")
+     * @Security("has_role('ROLE_USER')")
      */
     public function editAction(User $user, Request $request)
     {

@@ -40,4 +40,22 @@ class UserTest extends TestCase
         $user->setRoles(['ROLE_USER']);
         $this->assertSame(['ROLE_USER'], $user->getRoles());
     }
+
+    public function testHydrate()
+    {
+        $formData = array(
+            'username' => 'my username test',
+            'password' => 'my password test',
+            'email' => 'my email test',
+            'roles' => ['ROLE_ADMIN']
+        );
+
+        $user = new User();
+
+        $user->hydrate($formData);
+        static::assertSame('my username test',$user->getUsername());
+        static::assertSame('my password test',$user->getPassword());
+        static::assertSame('my email test',$user->getEmail());
+        static::assertSame(['ROLE_ADMIN'],$user->getRoles());
+    }
 }
