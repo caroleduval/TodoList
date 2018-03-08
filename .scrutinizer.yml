@@ -1,0 +1,7 @@
+checks:
+  php:
+    excluded_dependencies:
+        - symfony
+
+filter:
+    paths: ["src/*","tests/*"]
