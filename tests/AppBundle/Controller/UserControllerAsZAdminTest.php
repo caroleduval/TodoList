@@ -227,7 +227,7 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[username]'] = 'user';
+        $form['user_edit_as_admin[username]'] = 'username';
         $crawler=$this->client->submit($form);
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
@@ -285,7 +285,7 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[email]'] = 'user@email.fr';
+        $form['user_edit_as_admin[email]'] = 'username@email.fr';
         $crawler=$this->client->submit($form);
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());

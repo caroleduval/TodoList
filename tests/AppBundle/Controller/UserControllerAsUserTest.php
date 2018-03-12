@@ -92,7 +92,7 @@ class UserControllerAsUserTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Ajouter')->form();
-        $form['user[username]'] = 'userUser';
+        $form['user[username]'] = 'username';
         $form['user[password][first]'] = 'password';
         $form['user[password][second]'] = 'password';
         $form['user[email]'] = 'userUser2@email.fr';

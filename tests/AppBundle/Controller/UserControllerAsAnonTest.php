@@ -89,7 +89,7 @@ class UserControllerAsAnonTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Ajouter')->form();
-        $form['user[username]'] = 'NewAnon';
+        $form['user[username]'] = 'username';
         $form['user[password][first]'] = 'password';
         $form['user[password][second]'] = 'password';
         $form['user[email]'] = 'userAnon2@mail.fr';
@@ -158,7 +158,7 @@ class UserControllerAsAnonTest extends WebTestCase
         $form['user[username]'] = 'userAnon2';
         $form['user[password][first]'] = 'password';
         $form['user[password][second]'] = 'password';
-        $form['user[email]'] = 'NewAnon@email.fr';
+        $form['user[email]'] = 'username@email.fr';
         $crawler=$this->client->submit($form);
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
