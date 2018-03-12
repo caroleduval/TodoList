@@ -1,7 +1,9 @@
 <?php
 namespace AppBundle\Controller;
 use AppBundle\Entity\User;
+use AppBundle\Form\UserAsAdminType;
 use AppBundle\Form\UserType;
+use AppBundle\Form\UserEditAsAdminType;
 use AppBundle\Form\UserEditType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -19,9 +21,7 @@ class UserController extends Controller
         if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
         {
             return $this->render('user/list.html.twig', ['users' => $this->getDoctrine()->getRepository('AppBundle:User')->findAll()]);
-        }
-        else
-        {
+        } else {
             return $this->render('user/view.html.twig', ['user' => $this->getDoctrine()->getRepository('AppBundle:User')->find($user->getId())]);
         }
     }
@@ -30,9 +30,16 @@ class UserController extends Controller
      */
     public function createAction(Request $request)
     {
-        $user_roles = (is_null($this->getUser()))? []:$this->getUser()->getRoles();
+        $role = (is_null($this->getUser())) ? [] : $this->getUser()->getRoles();
+
         $user = new User();
-        $form = $this->createForm(UserType::class, $user, array('role' => $user_roles));
+
+        if (in_array('ROLE_ADMIN',$role)){
+            $form = $this->createForm(UserAsAdminType::class, $user);
+        } else {
+            $form = $this->createForm(UserType::class, $user);
+        }
+
         $form->handleRequest($request);
         if ($form->isValid()) {
             $em = $this->getDoctrine()->getManager();
@@ -53,8 +60,11 @@ class UserController extends Controller
     {
         $this->denyAccessUnlessGranted('edit', $user);
 
-        $user_roles = $this->getUser()->getRoles();
-        $form = $this->createForm(UserEditType::class, $user, array('role' => $user_roles));
+        if (in_array('ROLE_ADMIN',$this->getUser()->getRoles())){
+            $form = $this->createForm(UserEditAsAdminType::class, $user);
+        } else {
+            $form = $this->createForm(UserEditType::class, $user);
+        }
 
         $originalPassword = $user->getPassword();
 

@@ -6,6 +6,9 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class DefaultControllerTest extends WebTestCase
 {
+    /**
+     * Test on homepage "/" if not connected. must failed
+     */
     public function testIndexifnotconnected()
     {
         $client = static::createClient();
@@ -18,6 +21,9 @@ class DefaultControllerTest extends WebTestCase
         static::assertSame(1, $crawler->filter('html:contains("Se connecter")')->count());
     }
 
+    /**
+     * Test on homepage "/" if connected. must succeed
+     */
     public function testIndexifconnected()
     {
         $client = static::createClient(array(), array(
@@ -27,7 +33,6 @@ class DefaultControllerTest extends WebTestCase
 
         $crawler = $client->request('GET', '/');
 
-//        $this->assertEquals(200, $client->getResponse()->getStatusCode());
         static::assertSame(1, $crawler->filter('html:contains("vos tâches sans effort")')->count());
     }
 }
