@@ -25,7 +25,7 @@ class TaskControllerAsAdminTest extends WebTestCase
     }
 
     /**
-     * Test on "/tasks" page as Admin. must succeed
+     * Test on "/tasks" pages as Admin. must succeed
      */
     public function testTaskList()
     {
@@ -34,7 +34,14 @@ class TaskControllerAsAdminTest extends WebTestCase
         $link = $crawler->selectLink('Consulter la liste des tâches à faire')->link();
         $crawler = $this->client->click($link);
 
-        static::assertEquals(3, $crawler->filter('form:contains("Supprimer")')->count());
+        static::assertEquals(4, $crawler->filter('form:contains("Marquer comme faite")')->count());
+        static::assertEquals(0, $crawler->filter('form:contains("Marquer non terminée")')->count());
+
+        $link = $crawler->selectLink('Consulter la liste des tâches terminées')->link();
+        $crawler = $this->client->click($link);
+
+        static::assertEquals(0, $crawler->filter('form:contains("Marquer comme faite")')->count());
+        static::assertEquals(1, $crawler->filter('form:contains("Marquer non terminée")')->count());
     }
 
     /**
@@ -105,6 +112,7 @@ class TaskControllerAsAdminTest extends WebTestCase
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
         static::assertSame(1, $crawler->filter('div.alert.alert-success')->count());
         static::assertEquals(1, $crawler->filter('html:contains("une tâche test admin")')->count());
+        static::assertEquals(5, $crawler->filter('form:contains("Marquer comme faite")')->count());
 
         $form = $crawler->filter('button:contains("Supprimer")')->last()->form();
         $this->client->submit($form);
@@ -112,6 +120,8 @@ class TaskControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->followRedirect();
 
         static::assertSame(1, $crawler->filter('html:contains("Superbe ! La tâche a bien été supprimée.")')->count());
+        static::assertEquals(0, $crawler->filter('html:contains("une tâche test admin")')->count());
+        static::assertEquals(4, $crawler->filter('form:contains("Marquer comme faite")')->count());
     }
 
     /**
@@ -231,7 +241,12 @@ class TaskControllerAsAdminTest extends WebTestCase
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
         static::assertSame(1, $crawler->filter('html:contains("a bien été marquée comme faite.")')->count());
-        static::assertSame(1, $crawler->filter('form:contains("Marquer non terminée")')->count());
+        static::assertEquals(4, $crawler->filter('form:contains("Marquer comme faite")')->count());
+
+        $link = $crawler->selectLink('Consulter la liste des tâches terminées')->link();
+        $crawler = $this->client->click($link);
+
+        static::assertSame(2, $crawler->filter('form:contains("Marquer non terminée")')->count());
     }
 
     /**
@@ -242,7 +257,7 @@ class TaskControllerAsAdminTest extends WebTestCase
     {
         $crawler = $this->client->request('GET', '/');
 
-        $link = $crawler->selectLink('Consulter la liste des tâches à faire')->link();
+        $link = $crawler->selectLink('Consulter la liste des tâches terminées')->link();
         $crawler = $this->client->click($link);
 
         $form = $crawler->filter('button:contains("Supprimer")')->last()->form();
@@ -253,6 +268,7 @@ class TaskControllerAsAdminTest extends WebTestCase
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
         static::assertSame(1, $crawler->filter('html:contains("Superbe ! La tâche a bien été supprimée.")')->count());
         static::assertEquals(0, $crawler->filter('html:contains("une tâche test modifiée")')->count());
+        static::assertEquals(1, $crawler->filter('form:contains("Marquer non terminée")')->count());
     }
 
     /**
@@ -347,7 +363,7 @@ class TaskControllerAsAdminTest extends WebTestCase
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
         static::assertSame(1, $crawler->filter('div.alert.alert-success')->count());
-        static::assertEquals(0, $crawler->filter('html:contains("Détails de la tâche 3")')->count());
+        static::assertEquals(0, $crawler->filter('html:contains("Détails de la tâche 5")')->count());
         static::assertEquals(1, $crawler->filter('html:contains("description modifiée")')->count());
     }
 
@@ -369,7 +385,12 @@ class TaskControllerAsAdminTest extends WebTestCase
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
         static::assertSame(1, $crawler->filter('html:contains("a bien été marquée comme faite.")')->count());
-        static::assertSame(1, $crawler->filter('form:contains("Marquer non terminée")')->count());
+        static::assertSame(3, $crawler->filter('form:contains("Marquer comme faite")')->count());
+
+        $link = $crawler->selectLink('Consulter la liste des tâches terminées')->link();
+        $crawler = $this->client->click($link);
+
+        static::assertSame(2, $crawler->filter('form:contains("Marquer non terminée")')->count());
     }
 
     /**
@@ -380,7 +401,7 @@ class TaskControllerAsAdminTest extends WebTestCase
     {
         $crawler = $this->client->request('GET', '/');
 
-        $link = $crawler->selectLink('Consulter la liste des tâches à faire')->link();
+        $link = $crawler->selectLink('Consulter la liste des tâches terminées')->link();
         $crawler = $this->client->click($link);
 
         $form = $crawler->filter('button:contains("Supprimer")')->last()->form();
@@ -390,8 +411,7 @@ class TaskControllerAsAdminTest extends WebTestCase
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
         static::assertSame(1, $crawler->filter('html:contains("Superbe ! La tâche a bien été supprimée.")')->count());
-        static::assertEquals(0, $crawler->filter('html:contains("Titre modifié")')->count());
-        static::assertEquals(2, $crawler->filter('form:contains("Supprimer")')->count());
+        static::assertSame(1, $crawler->filter('form:contains("Marquer non terminée")')->count());
     }
 
     /**

@@ -44,9 +44,11 @@ class LoadData implements FixtureInterface, ContainerAwareInterface
         $manager->persist($user3);
 
         $data_tasks = array(
-            [$user1, '2018-02-13 16:24:30', 'Réaliser le projet', 'Détails de la tâche 1', false],
-            [$user1, '2018-02-13 17:24:30', 'Finaliser le projet', 'Détails de la tâche 2', false],
-            [$user2, '2018-02-13 18:24:30', 'Passer la soutenance', 'Détails de la tâche 3', false]
+            [$user1, '2018-02-13 16:24:30', 'Réaliser le projet', 'Détails de la tâche 1', true],
+            [$user1, '2018-02-13 17:24:30', 'Analyser le projet', 'Détails de la tâche 2', false],
+            [$user2, '2018-02-13 18:24:30', 'Travailler sur le front', 'Détails de la tâche 3', false],
+            [$user1, '2018-02-13 19:24:30', 'Finaliser le projet', 'Détails de la tâche 4', false],
+            [$user2, '2018-02-13 20:24:30', 'Passer la soutenance', 'Détails de la tâche 5', false],
         );
 
         foreach ($data_tasks as $data) {
