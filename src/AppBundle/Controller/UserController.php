@@ -34,15 +34,15 @@ class UserController extends Controller
 
         $user = new User();
 
-        if (in_array('ROLE_ADMIN',$role)){
-            $form = $this->createForm(UserAsAdminType::class, $user);
-        } else {
-            $form = $this->createForm(UserType::class, $user);
-        }
+        $type= (in_array('ROLE_ADMIN',$role)) ? UserAsAdminType::class : UserType::class;
+        $form = $this->createForm($type, $user);
 
         $form->handleRequest($request);
-        if ($form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
+            if (is_null($user->getPassword())){
+                throw new \Exception('Password can\'t be null!');
+            }
             $password = $this->get('security.password_encoder')->encodePassword($user, $user->getPassword());
             $user->setPassword($password);
             $em->persist($user);
@@ -60,16 +60,13 @@ class UserController extends Controller
     {
         $this->denyAccessUnlessGranted('edit', $user);
 
-        if (in_array('ROLE_ADMIN',$this->getUser()->getRoles())){
-            $form = $this->createForm(UserEditAsAdminType::class, $user);
-        } else {
-            $form = $this->createForm(UserEditType::class, $user);
-        }
+        $type= (in_array('ROLE_ADMIN',$this->getUser()->getRoles())) ? UserEditAsAdminType::class : UserEditType::class;
+        $form = $this->createForm($type, $user);
 
         $originalPassword = $user->getPassword();
 
         $form->handleRequest($request);
-        if ($form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $plainPassword = $form->get('password')->getData();
             if (!empty($plainPassword)) {
                 $password = $this->get('security.password_encoder')->encodePassword($user, $user->getPassword());

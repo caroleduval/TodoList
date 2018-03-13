@@ -45,76 +45,101 @@ class Task
      */
     private $author;
 
+    /**
+     * Task constructor.
+     * Initialize the task with a creation date and a status as non achieved
+     */
     public function __construct()
     {
         $this->createdAt = new \Datetime();
         $this->isDone = false;
     }
 
+    /**
+     * @return mixed
+     */
     public function getId()
     {
         return $this->id;
     }
 
+    /**
+     * @return \Datetime
+     */
     public function getCreatedAt()
     {
         return $this->createdAt;
     }
 
+    /**
+     * @param $createdAt
+     */
     public function setCreatedAt($createdAt)
     {
         $this->createdAt = $createdAt;
     }
 
+    /**
+     * @return mixed
+     */
     public function getTitle()
     {
         return $this->title;
     }
 
+    /**
+     * @param $title
+     */
     public function setTitle($title)
     {
         $this->title = $title;
     }
 
+    /**
+     * @return mixed
+     */
     public function getContent()
     {
         return $this->content;
     }
 
+    /**
+     * @param $content
+     */
     public function setContent($content)
     {
         $this->content = $content;
     }
 
+    /**
+     * @return bool
+     */
     public function isDone()
     {
         return $this->isDone;
     }
 
+    /**
+     * @param $flag
+     */
     public function toggle($flag)
     {
         $this->isDone = $flag;
     }
 
+    /**
+     * @return mixed
+     */
     public function getAuthor()
     {
         return $this->author;
     }
 
+    /**
+     * @param $author
+     */
     public function setAuthor($author)
     {
         $this->author = $author;
-    }
-
-    public function hydrate(array $donnees)
-    {
-        foreach ($donnees as $key => $value)
-        {
-            $method = 'set'.ucfirst($key);
-            if (method_exists($this, $method))
-            {
-                $this->$method($value);
-            }
-        }
     }
 }

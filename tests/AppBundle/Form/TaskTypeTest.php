@@ -23,7 +23,8 @@ class TaskTypeTest extends TypeTestCase
         $form = $this->factory->create(TaskType::class,$task0);
 
         $task= new Task();
-        $task->hydrate($formData);
+        $task->SetTitle('my title test');
+        $task->SetContent('my content test');
         $task->setAuthor($user);
 
         $form->submit($formData);
