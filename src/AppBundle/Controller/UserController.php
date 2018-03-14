@@ -32,9 +32,6 @@ class UserController extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            if (is_null($user->getPassword())){
-                throw new \Exception('Password can\'t be null !');
-            }
             $password = $this->get('security.password_encoder')->encodePassword($user, $user->getPassword());
             $user->setPassword($password);
             $em->persist($user);

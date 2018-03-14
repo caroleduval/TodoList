@@ -536,6 +536,27 @@ class UserControllerAsAdminTest extends WebTestCase
 
     /**
      * Test on "/users/create" page as Admin.
+     * Test on posting an user without password. must failed.
+     */
+    public function testAdminCreateUserPasswordAsNull()
+    {
+        $crawler = $this->client->request('GET', '/users');
+
+        $link = $crawler->selectLink('Créer un utilisateur')->link();
+        $crawler = $this->client->click($link);
+
+        $form = $crawler->selectButton('Ajouter')->form();
+        $form['user[username]'] = 'usertest2';
+        $form['user[email]'] = 'email3@mail.fr';
+        $form['user[roles]'][1]->tick();
+        $crawler = $this->client->submit($form);
+
+        static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
+        static::assertRegExp('/\/users\/create$/', $this->client->getRequest()->getUri());
+    }
+
+    /**
+     * Test on "/users/create" page as Admin.
      * Test on posting an user with 2 different passwords. must failed.
      */
     public function testAdminCreateUserPasswordError()
