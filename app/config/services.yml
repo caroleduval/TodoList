@@ -8,16 +8,3 @@ services:
 #        class: AppBundle\Directory\ClassName
 #        arguments: ["@another_service_name", "plain_value", "%parameter_name%"]
 
-    app.user_voter:
-        class: AppBundle\Security\UserVoter
-        arguments: ['@security.access.decision_manager']
-        tags:
-            - { name: security.voter }
-        public: false
-
-    app.task_voter:
-        class: AppBundle\Security\TaskVoter
-        arguments: ['@security.access.decision_manager']
-        tags:
-            - { name: security.voter }
-        public: false
