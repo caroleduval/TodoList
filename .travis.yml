@@ -1,0 +1,10 @@
+language: php
+
+php:
+    - '7.1'
+
+
+script:
+    - composer install
+    - bin/console app:initialize-TDL --env=test
+    - vendor/bin/phpunit

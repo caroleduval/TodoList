@@ -15,6 +15,7 @@
                 <thead>
                 <tr>
                     <th>#</th>
+                    <th></th>
                     <th>Nom d'utilisateur</th>
                     <th>Adresse d'utilisateur</th>
                     <th>Actions</th>
@@ -24,6 +25,9 @@
                 {% for user in users %}
                     <tr>
                         <th scope="row">{{ loop.index }}</th>
+                        <td>{% for role in user.roles %}
+                                {% if role == 'ROLE_ADMIN' %}Admin{% endif %}
+                            {% endfor %}</td>
                         <td>{{ user.username }}</td>
                         <td>{{ user.email }}</td>
                         <td>

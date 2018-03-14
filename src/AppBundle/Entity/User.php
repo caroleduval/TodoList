@@ -45,47 +45,74 @@ class User implements UserInterface
      */
     private $roles = [];
 
+    /**
+     * User constructor.
+     * By default, a user has the 'ROLE_USER' role
+     */
     public function __construct()
     {
         $this->roles[] = 'ROLE_USER';
     }
 
-
+    /**
+     * @return mixed
+     */
     public function getId()
     {
         return $this->id;
     }
 
+    /**
+     * @return string
+     */
     public function getUsername()
     {
         return $this->username;
     }
 
+    /**
+     * @param $username
+     */
     public function setUsername($username)
     {
         $this->username = $username;
     }
 
+    /**
+     * @return null|string
+     */
     public function getSalt()
     {
         return null;
     }
 
+    /**
+     * @return string
+     */
     public function getPassword()
     {
         return $this->password;
     }
 
+    /**
+     * @param $password
+     */
     public function setPassword($password)
     {
         $this->password = $password;
     }
 
+    /**
+     * @return mixed
+     */
     public function getEmail()
     {
         return $this->email;
     }
 
+    /**
+     * @param $email
+     */
     public function setEmail($email)
     {
         $this->email = $email;
@@ -101,25 +128,19 @@ class User implements UserInterface
         return array_unique($roles);
     }
 
+    /**
+     * @param array $roles
+     */
     public function setRoles(array $roles)
     {
         $this->roles = [];
         $this->roles = $roles;
     }
 
+    /**
+     *
+     */
     public function eraseCredentials()
     {
-    }
-
-    public function hydrate(array $donnees)
-    {
-        foreach ($donnees as $key => $value)
-        {
-            $method = 'set'.ucfirst($key);
-            if (method_exists($this, $method))
-            {
-                $this->$method($value);
-            }
-        }
     }
 }

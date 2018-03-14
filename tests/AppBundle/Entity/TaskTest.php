@@ -52,18 +52,4 @@ class TaskTest extends TestCase
         $task->setAuthor($user);
         static::assertSame('1', $task->getAuthor()->getId());
     }
-
-    public function testHydrate()
-    {
-        $formData = array(
-            'title' => 'my title test',
-            'content' => 'my content test',
-        );
-
-        $task = new Task();
-
-        $task->hydrate($formData);
-        static::assertSame('my title test',$task->getTitle());
-        static::assertSame('my content test',$task->getContent());
-    }
 }

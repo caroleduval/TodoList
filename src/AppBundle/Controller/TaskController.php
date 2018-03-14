@@ -11,12 +11,13 @@ use Symfony\Component\HttpFoundation\Request;
 class TaskController extends Controller
 {
     /**
-     * @Route("/tasks", name="task_list")
+     * @Route("/tasks/list/{done}", name="task_list")
      */
-    public function listAction()
+    public function listAction($done=0)
     {
-        return $this->render('task/list.html.twig', ['tasks' => $this->getDoctrine()->getRepository('AppBundle:Task')->findAll()]);
+        return $this->render('task/list.html.twig', ['done'=>$done,'tasks' => $this->getDoctrine()->getRepository('AppBundle:Task')->findByIsDone($done)]);
     }
+
 
     /**
      * @Route("/tasks/create", name="task_create")
@@ -29,7 +30,7 @@ class TaskController extends Controller
 
         $form->handleRequest($request);
 
-        if ($form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
 
             $em->persist($task);
@@ -52,7 +53,7 @@ class TaskController extends Controller
 
         $form->handleRequest($request);
 
-        if ($form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $this->getDoctrine()->getManager()->flush();
 
             $this->addFlash('success', 'La tâche a bien été modifiée.');
@@ -71,12 +72,14 @@ class TaskController extends Controller
      */
     public function toggleTaskAction(Task $task)
     {
+        $status=($task->isDone()==0)?0:1;
+        $message=($task->isDone()==0)?'comme faite':'comme non terminée';
         $task->toggle(!$task->isDone());
         $this->getDoctrine()->getManager()->flush();
 
-        $this->addFlash('success', sprintf('La tâche %s a bien été marquée comme faite.', $task->getTitle()));
+        $this->addFlash('success', sprintf('La tâche "%s" a bien été marquée '.$message.'.', $task->getTitle()));
 
-        return $this->redirectToRoute('task_list');
+        return $this->redirectToRoute('task_list', array('done' => $status));
     }
 
     /**
@@ -86,12 +89,14 @@ class TaskController extends Controller
     {
         $this->denyAccessUnlessGranted('delete', $task);
 
+        $status=($task->isDone()==0)?0:1;
+
         $em = $this->getDoctrine()->getManager();
         $em->remove($task);
         $em->flush();
 
         $this->addFlash('success', 'La tâche a bien été supprimée.');
 
-        return $this->redirectToRoute('task_list');
+        return $this->redirectToRoute('task_list', array('done' => $status));
     }
 }

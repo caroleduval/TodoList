@@ -6,6 +6,9 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class SecurityControllerTest extends WebTestCase
 {
+    /**
+     * @var null
+     */
     private $client=null;
 
     public function setUp()
@@ -13,6 +16,9 @@ class SecurityControllerTest extends WebTestCase
         $this->client = static::createClient();
     }
 
+    /**
+     * Test for logging in and out as Administrator
+     */
     public function testloginActionisOKasAdmin()
     {
         $crawler=$this->client->request('GET', '/login');
@@ -24,10 +30,20 @@ class SecurityControllerTest extends WebTestCase
 
         $crawler = $this->client->followRedirect();
 
+        $array = $this->client->getContainer()->get('security.token_storage')->getToken()->getUser()->getRoles();
+
         static::assertSame(1, $crawler->filter('html:contains("vos tâches sans effort")')->count());
-//        $this->assertContains('ROLE_ADMIN', $this->client->getUser()->getRoles());
+        $this->assertContains('ROLE_ADMIN', $array);
+
+        $this->client->request('GET', '/logout');
+        $this->client->followRedirect();
+        $this->client->followRedirect();
+        static::assertRegExp('/\/login$/', $this->client->getRequest()->getUri());
     }
 
+    /**
+     * Test for logging in and out as User
+     */
     public function testloginActionisOKasUser()
     {
         $crawler=$this->client->request('GET', '/login');
@@ -39,10 +55,20 @@ class SecurityControllerTest extends WebTestCase
 
         $crawler = $this->client->followRedirect();
 
+        $array = $this->client->getContainer()->get('security.token_storage')->getToken()->getUser()->getRoles();
+
         static::assertSame(1, $crawler->filter('html:contains("vos tâches sans effort")')->count());
-//        $this->assertNotContains('ROLE_ADMIN', $this->client->getResponse()->getUser()->getRoles());
+        $this->assertNotContains('ROLE_ADMIN', $array);
+
+        $this->client->request('GET', '/logout');
+        $this->client->followRedirect();
+        $this->client->followRedirect();
+        static::assertRegExp('/\/login$/', $this->client->getRequest()->getUri());
     }
 
+    /**
+     * Test for logging with an invalid username
+     */
     public function testloginWrongUsername()
     {
         $crawler=$this->client->request('GET', '/login');
@@ -57,6 +83,9 @@ class SecurityControllerTest extends WebTestCase
         static::assertSame(1, $crawler->filter('div.alert.alert-danger')->count());
     }
 
+    /**
+     * Test for logging with an invalid password
+     */
     public function testloginWrongPassword()
     {
         $crawler=$this->client->request('GET', '/login');
