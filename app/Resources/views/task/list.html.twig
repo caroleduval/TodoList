@@ -5,14 +5,14 @@
 {% block body %}
     <div class="row">
         <a href="{{ path('task_create') }}" class="btn btn-success pull-left">Créer une tâche</a>
-        {% if done == '1' %}
-            <a href="{{ path('task_list', {'done': 0} ) }}" class="btn btn-info pull-right">Consulter la liste des tâches à faire</a>
+        {% if isDone == '1' %}
+            <a href="{{ path('task_list', {'isDone': 0} ) }}" class="btn btn-info pull-right">Consulter la liste des tâches à faire</a>
         {%  else %}
-            <a href="{{ path('task_list', {'done': 1} ) }}" class="btn btn-warning pull-right">Consulter la liste des tâches terminées</a>
+            <a href="{{ path('task_list', {'isDone': 1} ) }}" class="btn btn-warning pull-right">Consulter la liste des tâches terminées</a>
         {% endif %}
     </div>
     <div>
-    {% if done == '1' %}
+    {% if isDone == '1' %}
         <h2>Liste des tâches terminées</h2>
     {%  else %}
         <h2>Liste des tâches à faire</h2>

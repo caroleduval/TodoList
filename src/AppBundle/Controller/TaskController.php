@@ -8,15 +8,17 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 
 class TaskController extends Controller
 {
     /**
-     * @Route("/tasks/list/{done}", name="task_list")
+     * @Route("/tasks/list/{isDone}", name="task_list")
+     * @Cache(smaxage="86400", public=true)
      */
-    public function listAction($done=0)
+    public function listAction($isDone=0)
     {
-        return $this->render('task/list.html.twig', ['done'=>$done,'tasks' => $this->getDoctrine()->getRepository('AppBundle:Task')->findByIsDone($done)]);
+        return $this->render('task/list.html.twig', ['isDone'=>$isDone,'tasks' => $this->getDoctrine()->getRepository('AppBundle:Task')->findByIsDone($isDone)]);
     }
 
 
@@ -80,7 +82,7 @@ class TaskController extends Controller
 
         $this->addFlash('success', sprintf('La tâche "%s" a bien été marquée '.$message.'.', $task->getTitle()));
 
-        return $this->redirectToRoute('task_list', array('done' => $status));
+        return $this->redirectToRoute('task_list', array('isDone' => $status));
     }
 
     /**
@@ -97,6 +99,6 @@ class TaskController extends Controller
 
         $this->addFlash('success', 'La tâche a bien été supprimée.');
 
-        return $this->redirectToRoute('task_list', array('done' => $status));
+        return $this->redirectToRoute('task_list', array('isDone' => $status));
     }
 }

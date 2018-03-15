@@ -1,18 +1,20 @@
 <?php
+
 namespace AppBundle\Controller;
+
 use AppBundle\Entity\User;
-use AppBundle\Form\UserAsAdminType;
 use AppBundle\Form\UserType;
-use AppBundle\Form\UserEditAsAdminType;
 use AppBundle\Form\UserEditType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
+
 class UserController extends Controller
 {
     /**
      * @Route("/users", name="user_list")
+     * @Cache(smaxage="86400", public=true)
      */
     public function listAction()
     {
@@ -41,6 +43,7 @@ class UserController extends Controller
         }
         return $this->render('user/create.html.twig', ['form' => $form->createView()]);
     }
+
     /**
      * @Route("/users/{id}/edit", name="user_edit")
      */
