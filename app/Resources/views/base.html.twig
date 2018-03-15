@@ -31,24 +31,23 @@
             <a class="navbar-brand" href="{{ path('homepage') }}">To Do List app</a>
 
             <img src="{{ asset('img/Logo_OpenClassrooms.png') }}" alt="OpenClassrooms" />
+
         </div>
+        {% if app.user %}
+            <div class="navbar-brand pull-right">Bienvenue {{ app.user.username }}.</div>
+        {% endif %}
     </div>
 </nav>
 
 <!-- Page Content -->
 <div class="container">
     <div class="row">
-        <a href="{{ path('user_create') }}" class="btn btn-primary">Créer un utilisateur</a>
-
         {% if app.user %}
             <a href="{{ path('logout') }}" class="pull-right btn btn-danger">Se déconnecter</a>
             {% if is_granted("ROLE_ADMIN") %}
                 <a href="{{ path('user_list') }}" class="pull-right btn btn-success">Utilisateurs</a>
-            {% else %}
-                <a href="{{ path('user_list') }}" class="pull-right btn btn-success">Mon profil</a>
             {% endif %}
         {% endif %}
-
 
         {% if not app.user and 'login' != app.request.attributes.get('_route') %}
             <a href="{{ path('login') }}" class="btn btn-success">Se connecter</a>

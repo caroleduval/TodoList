@@ -7,6 +7,7 @@ use AppBundle\Form\TaskType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 class TaskController extends Controller
 {
@@ -84,11 +85,10 @@ class TaskController extends Controller
 
     /**
      * @Route("/tasks/{id}/delete", name="task_delete")
+     * @Security("user == task.getAuthor()")
      */
     public function deleteTaskAction(Task $task)
     {
-        $this->denyAccessUnlessGranted('delete', $task);
-
         $status=($task->isDone()==0)?0:1;
 
         $em = $this->getDoctrine()->getManager();

@@ -62,7 +62,7 @@ class TaskControllerAsAdminTest extends WebTestCase
         $form['task[content]'] = 'description d\'une tâche';
         $this->client->submit($form);
 
-        static::assertSame(0, $crawler->filter('div.alert.alert-success')->count());
+        static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
         static::assertRegExp('/\/tasks\/create$/', $this->client->getRequest()->getUri());
     }
 
@@ -84,7 +84,7 @@ class TaskControllerAsAdminTest extends WebTestCase
         $form['task[title]'] = 'une tâche test admin';
         $this->client->submit($form);
 
-        static::assertSame(0, $crawler->filter('div.alert.alert-success')->count());
+        static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
         static::assertRegExp('/\/tasks\/create$/', $this->client->getRequest()->getUri());
     }
 
@@ -110,7 +110,7 @@ class TaskControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->followRedirect();
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('div.alert.alert-success')->count());
+        static::assertEquals(1, $crawler->filter('div.alert.alert-success')->count());
         static::assertEquals(1, $crawler->filter('html:contains("une tâche test admin")')->count());
         static::assertEquals(5, $crawler->filter('form:contains("Marquer comme faite")')->count());
 
@@ -119,7 +119,7 @@ class TaskControllerAsAdminTest extends WebTestCase
 
         $crawler = $this->client->followRedirect();
 
-        static::assertSame(1, $crawler->filter('html:contains("Superbe ! La tâche a bien été supprimée.")')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("Superbe ! La tâche a bien été supprimée.")')->count());
         static::assertEquals(0, $crawler->filter('html:contains("une tâche test admin")')->count());
         static::assertEquals(4, $crawler->filter('form:contains("Marquer comme faite")')->count());
     }
@@ -145,7 +145,7 @@ class TaskControllerAsAdminTest extends WebTestCase
         $form['task[title]'] = null;
         $this->client->submit($form);
 
-        static::assertSame(0, $crawler->filter('div.alert.alert-success')->count());
+        static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
         static::assertRegExp('#edit#', $this->client->getRequest()->getUri());
     }
 
@@ -170,7 +170,7 @@ class TaskControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->followRedirect();
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('div.alert.alert-success')->count());
+        static::assertEquals(1, $crawler->filter('div.alert.alert-success')->count());
         static::assertEquals(0, $crawler->filter('a:contains("une tâche test admin")')->count());
         static::assertEquals(1, $crawler->filter('html:contains("une tâche test modifiée")')->count());
     }
@@ -193,7 +193,7 @@ class TaskControllerAsAdminTest extends WebTestCase
         $form['task[content]'] = null;
         $this->client->submit($form);
 
-        static::assertSame(0, $crawler->filter('div.alert.alert-success')->count());
+        static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
         static::assertRegExp('#edit#', $this->client->getRequest()->getUri());
     }
 
@@ -218,7 +218,7 @@ class TaskControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->followRedirect();
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('div.alert.alert-success')->count());
+        static::assertEquals(1, $crawler->filter('div.alert.alert-success')->count());
         static::assertEquals(0, $crawler->filter('html:contains("description d\'une tâche")')->count());
         static::assertEquals(1, $crawler->filter('html:contains("description modifiée")')->count());
     }
@@ -240,13 +240,13 @@ class TaskControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->followRedirect();
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("a bien été marquée comme faite.")')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("a bien été marquée comme faite.")')->count());
         static::assertEquals(4, $crawler->filter('form:contains("Marquer comme faite")')->count());
 
         $link = $crawler->selectLink('Consulter la liste des tâches terminées')->link();
         $crawler = $this->client->click($link);
 
-        static::assertSame(2, $crawler->filter('form:contains("Marquer non terminée")')->count());
+        static::assertEquals(2, $crawler->filter('form:contains("Marquer non terminée")')->count());
     }
 
     /**
@@ -266,7 +266,7 @@ class TaskControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->followRedirect();
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("Superbe ! La tâche a bien été supprimée.")')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("Superbe ! La tâche a bien été supprimée.")')->count());
         static::assertEquals(0, $crawler->filter('html:contains("une tâche test modifiée")')->count());
         static::assertEquals(1, $crawler->filter('form:contains("Marquer non terminée")')->count());
     }
@@ -289,7 +289,7 @@ class TaskControllerAsAdminTest extends WebTestCase
         $form['task[title]'] = null;
         $this->client->submit($form);
 
-        static::assertSame(0, $crawler->filter('div.alert.alert-success')->count());
+        static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
         static::assertRegExp('#edit#', $this->client->getRequest()->getUri());
     }
 
@@ -311,7 +311,7 @@ class TaskControllerAsAdminTest extends WebTestCase
         $form['task[content]'] = null;
         $this->client->submit($form);
 
-        static::assertSame(0, $crawler->filter('div.alert.alert-success')->count());
+        static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
         static::assertRegExp('#edit#', $this->client->getRequest()->getUri());
     }
 
@@ -336,7 +336,7 @@ class TaskControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->followRedirect();
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('div.alert.alert-success')->count());
+        static::assertEquals(1, $crawler->filter('div.alert.alert-success')->count());
         static::assertEquals(0, $crawler->filter('html:contains("Passer la soutenance")')->count());
         static::assertEquals(1, $crawler->filter('html:contains("Titre modifié")')->count());
     }
@@ -362,7 +362,7 @@ class TaskControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->followRedirect();
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('div.alert.alert-success')->count());
+        static::assertEquals(1, $crawler->filter('div.alert.alert-success')->count());
         static::assertEquals(0, $crawler->filter('html:contains("Détails de la tâche 5")')->count());
         static::assertEquals(1, $crawler->filter('html:contains("description modifiée")')->count());
     }
@@ -384,18 +384,18 @@ class TaskControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->followRedirect();
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("a bien été marquée comme faite.")')->count());
-        static::assertSame(3, $crawler->filter('form:contains("Marquer comme faite")')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("a bien été marquée comme faite.")')->count());
+        static::assertEquals(3, $crawler->filter('form:contains("Marquer comme faite")')->count());
 
         $link = $crawler->selectLink('Consulter la liste des tâches terminées')->link();
         $crawler = $this->client->click($link);
 
-        static::assertSame(2, $crawler->filter('form:contains("Marquer non terminée")')->count());
+        static::assertEquals(2, $crawler->filter('form:contains("Marquer non terminée")')->count());
     }
 
     /**
      * Test on "/tasks/{id}/delete" page as Admin.
-     * Test on deleting the task of another user. must succeed.
+     * Test on deleting the task of another user. must failed.
      */
     public function testTaskDeleteNotAsOwner()
     {
@@ -407,11 +407,18 @@ class TaskControllerAsAdminTest extends WebTestCase
         $form = $crawler->filter('button:contains("Supprimer")')->last()->form();
         $this->client->submit($form);
 
-        $crawler = $this->client->followRedirect();
+        static::assertEquals(403, $this->client->getResponse()->getStatusCode());
+    }
 
-        static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("Superbe ! La tâche a bien été supprimée.")')->count());
-        static::assertSame(1, $crawler->filter('form:contains("Marquer non terminée")')->count());
+    /**
+     * Test on "/tasks/{id}/edit" page as Admin.
+     * Test on editing an inexistant task. must failed.
+     */
+    public function testInvalidTaskEdit()
+    {
+        $this->client->request('POST', '/tasks/99/edit');
+
+        static::assertEquals(404, $this->client->getResponse()->getStatusCode());
     }
 
     /**

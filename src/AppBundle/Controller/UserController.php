@@ -13,36 +13,25 @@ class UserController extends Controller
 {
     /**
      * @Route("/users", name="user_list")
-     * @Security("has_role('ROLE_USER')")
      */
     public function listAction()
     {
-        $user = $this->getUser();
-        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
-        {
-            return $this->render('user/list.html.twig', ['users' => $this->getDoctrine()->getRepository('AppBundle:User')->findAll()]);
-        } else {
-            return $this->render('user/view.html.twig', ['user' => $this->getDoctrine()->getRepository('AppBundle:User')->find($user->getId())]);
-        }
+        $users=$this->getDoctrine()->getRepository('AppBundle:User')->findAll();
+        return $this->render('user/list.html.twig', ['users' => $users]);
     }
+
     /**
      * @Route("/users/create", name="user_create")
      */
     public function createAction(Request $request)
     {
-        $role = (is_null($this->getUser())) ? [] : $this->getUser()->getRoles();
-
         $user = new User();
 
-        $type= (in_array('ROLE_ADMIN',$role)) ? UserAsAdminType::class : UserType::class;
-        $form = $this->createForm($type, $user);
+        $form = $this->createForm(UserType::class, $user);
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            if (is_null($user->getPassword())){
-                throw new \Exception('Password can\'t be null!');
-            }
             $password = $this->get('security.password_encoder')->encodePassword($user, $user->getPassword());
             $user->setPassword($password);
             $em->persist($user);
@@ -54,25 +43,21 @@ class UserController extends Controller
     }
     /**
      * @Route("/users/{id}/edit", name="user_edit")
-     * @Security("has_role('ROLE_USER')")
      */
     public function editAction(User $user, Request $request)
     {
-        $this->denyAccessUnlessGranted('edit', $user);
+        $form = $this->createForm(UserEditType::class, $user);
 
-        $type= (in_array('ROLE_ADMIN',$this->getUser()->getRoles())) ? UserEditAsAdminType::class : UserEditType::class;
-        $form = $this->createForm($type, $user);
-
-        $originalPassword = $user->getPassword();
+        $currentPassword = $user->getPassword();
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $plainPassword = $form->get('password')->getData();
-            if (!empty($plainPassword)) {
+            $newPassword = $form->get('password')->getData();
+            if (!empty($newPassword)) {
                 $password = $this->get('security.password_encoder')->encodePassword($user, $user->getPassword());
                 $user->setPassword($password);
             } else {
-                $user->setPassword($originalPassword);
+                $user->setPassword($currentPassword);
             }
             $this->getDoctrine()->getManager()->flush();
             $this->addFlash('success', "L'utilisateur a bien été modifié");

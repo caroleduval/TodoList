@@ -32,7 +32,7 @@ class SecurityControllerTest extends WebTestCase
 
         $array = $this->client->getContainer()->get('security.token_storage')->getToken()->getUser()->getRoles();
 
-        static::assertSame(1, $crawler->filter('html:contains("vos tâches sans effort")')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("vos tâches sans effort")')->count());
         $this->assertContains('ROLE_ADMIN', $array);
 
         $this->client->request('GET', '/logout');
@@ -57,7 +57,7 @@ class SecurityControllerTest extends WebTestCase
 
         $array = $this->client->getContainer()->get('security.token_storage')->getToken()->getUser()->getRoles();
 
-        static::assertSame(1, $crawler->filter('html:contains("vos tâches sans effort")')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("vos tâches sans effort")')->count());
         $this->assertNotContains('ROLE_ADMIN', $array);
 
         $this->client->request('GET', '/logout');
@@ -80,7 +80,7 @@ class SecurityControllerTest extends WebTestCase
 
         $crawler = $this->client->followRedirect();
 
-        static::assertSame(1, $crawler->filter('div.alert.alert-danger')->count());
+        static::assertEquals(1, $crawler->filter('div.alert.alert-danger')->count());
     }
 
     /**
@@ -97,6 +97,6 @@ class SecurityControllerTest extends WebTestCase
 
         $crawler = $this->client->followRedirect();
 
-        static::assertSame(1, $crawler->filter('div.alert.alert-danger')->count());
+        static::assertEquals(1, $crawler->filter('div.alert.alert-danger')->count());
     }
 }

@@ -23,15 +23,42 @@ class UserControllerAsAdminTest extends WebTestCase
     }
 
     /**
+     * Test on "/users" page as Anon
+     * Display the users list. must failed.
+     */
+    public function testUserListAsAnon()
+    {
+        $this->client = static::createClient();
+
+        $this->client->request('GET', '/users');
+        static::assertEquals(302, $this->client->getResponse()->getStatusCode());
+        $this->client->followRedirect();
+
+        static::assertRegExp('/\/login$/', $this->client->getRequest()->getUri());
+    }
+    /**
+     * Test on "/users" page as User
+     * Display the users list. must failed.
+     */
+    public function testUserListAsUser()
+    {
+        $this->client = static::createClient();
+
+        $this->client->request('GET', '/users');
+
+        static::assertEquals(302, $this->client->getResponse()->getStatusCode());
+    }
+
+    /**
      * Test on "/users" page as Admin.
      * Display the users list
      */
-    public function testUserList()
+    public function testUserListAsAdmin()
     {
         $crawler = $this->client->request('GET', '/users');
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(3, $crawler->filter('a:contains("Edit")')->count());
+        static::assertEquals(3, $crawler->filter('a:contains("Edit")')->count());
     }
 
     /**
@@ -40,19 +67,19 @@ class UserControllerAsAdminTest extends WebTestCase
      */
     public function testAdminCreateAdminUsernameAsNull()
     {
-        $crawler = $this->client->request('GET', '/login');
+        $crawler = $this->client->request('GET', '/users');
 
         $link = $crawler->selectLink('Créer un utilisateur')->link();
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Ajouter')->form();
-        $form['user_as_admin[password][first]'] = 'password';
-        $form['user_as_admin[password][second]'] = 'password';
-        $form['user_as_admin[email]'] = 'userAnon2@mail.fr';
-        $form['user_as_admin[roles]'][1]->tick();
+        $form['user[password][first]'] = 'password';
+        $form['user[password][second]'] = 'password';
+        $form['user[email]'] = 'userAnon2@mail.fr';
+        $form['user[roles]'][1]->tick();
         $crawler=$this->client->submit($form);
 
-        static::assertSame(0, $crawler->filter('div.alert.alert-success')->count());
+        static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
         static::assertRegExp('/\/users\/create$/', $this->client->getRequest()->getUri());
     }
 
@@ -62,21 +89,21 @@ class UserControllerAsAdminTest extends WebTestCase
      */
     public function testAdminCreateAdminUsernameNotUnique()
     {
-        $crawler = $this->client->request('GET', '/');
+        $crawler = $this->client->request('GET', '/users');
 
         $link = $crawler->selectLink('Créer un utilisateur')->link();
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Ajouter')->form();
-        $form['user_as_admin[username]'] = 'username';
-        $form['user_as_admin[password][first]'] = 'password';
-        $form['user_as_admin[password][second]'] = 'password';
-        $form['user_as_admin[email]'] = 'emailtest@mail.fr';
-        $form['user_as_admin[roles]'][1]->tick();
+        $form['user[username]'] = 'username';
+        $form['user[password][first]'] = 'password';
+        $form['user[password][second]'] = 'password';
+        $form['user[email]'] = 'emailtest@mail.fr';
+        $form['user[roles]'][1]->tick();
         $crawler=$this->client->submit($form);
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("Cet username est déjà utilisé.") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("Cet username est déjà utilisé.") ')->count());
     }
 
     /**
@@ -85,19 +112,19 @@ class UserControllerAsAdminTest extends WebTestCase
      */
     public function testAdminCreateAdminPasswordAsNull()
     {
-        $crawler = $this->client->request('GET', '/login');
+        $crawler = $this->client->request('GET', '/users');
 
         $link = $crawler->selectLink('Créer un utilisateur')->link();
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Ajouter')->form();
-        $form['user_as_admin[username]'] = 'userUser2';
-        $form['user_as_admin[password][first]'] = null;
-        $form['user_as_admin[password][second]'] = null;
-        $form['user_as_admin[email]'] = 'userUser2@email.fr';
+        $form['user[username]'] = 'userUser2';
+        $form['user[password][first]'] = null;
+        $form['user[password][second]'] = null;
+        $form['user[email]'] = 'userUser2@email.fr';
         $crawler=$this->client->submit($form);
 
-        static::assertSame(0, $crawler->filter('div.alert.alert-success')->count());
+        static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
         static::assertRegExp('/\/users\/create$/', $this->client->getRequest()->getUri());
     }
 
@@ -107,21 +134,21 @@ class UserControllerAsAdminTest extends WebTestCase
      */
     public function testAdminCreateAdminPasswordError()
     {
-        $crawler = $this->client->request('GET', '/');
+        $crawler = $this->client->request('GET', '/users');
 
         $link = $crawler->selectLink('Créer un utilisateur')->link();
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Ajouter')->form();
-        $form['user_as_admin[username]'] = 'usertest2';
-        $form['user_as_admin[password][first]'] = 'password';
-        $form['user_as_admin[password][second]'] = 'password2';
-        $form['user_as_admin[email]'] = 'email3@mail.fr';
-        $form['user_as_admin[roles]'][1]->tick();
+        $form['user[username]'] = 'usertest2';
+        $form['user[password][first]'] = 'password';
+        $form['user[password][second]'] = 'password2';
+        $form['user[email]'] = 'email3@mail.fr';
+        $form['user[roles]'][1]->tick();
         $crawler = $this->client->submit($form);
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("Les deux mots de passe doivent correspondre.") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("Les deux mots de passe doivent correspondre.") ')->count());
     }
 
     /**
@@ -130,19 +157,19 @@ class UserControllerAsAdminTest extends WebTestCase
      */
     public function testAdminCreateAdminEmailAsNull()
     {
-        $crawler = $this->client->request('GET', '/login');
+        $crawler = $this->client->request('GET', '/users');
 
         $link = $crawler->selectLink('Créer un utilisateur')->link();
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Ajouter')->form();
-        $form['user_as_admin[username]'] = 'userwithoutemail';
-        $form['user_as_admin[password][first]'] = 'password';
-        $form['user_as_admin[password][second]'] = 'password';
-        $form['user_as_admin[roles]'][1]->tick();
+        $form['user[username]'] = 'userwithoutemail';
+        $form['user[password][first]'] = 'password';
+        $form['user[password][second]'] = 'password';
+        $form['user[roles]'][1]->tick();
         $crawler=$this->client->submit($form);
 
-        static::assertSame(0, $crawler->filter('div.alert.alert-success')->count());
+        static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
         static::assertRegExp('/\/users\/create$/', $this->client->getRequest()->getUri());
     }
 
@@ -152,21 +179,21 @@ class UserControllerAsAdminTest extends WebTestCase
      */
     public function testAdminCreateAdminEmailNotUnique()
     {
-        $crawler = $this->client->request('GET', '/');
+        $crawler = $this->client->request('GET', '/users');
 
         $link = $crawler->selectLink('Créer un utilisateur')->link();
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Ajouter')->form();
-        $form['user_as_admin[username]'] = 'userEmailnotUnique';
-        $form['user_as_admin[password][first]'] = 'password';
-        $form['user_as_admin[password][second]'] = 'password';
-        $form['user_as_admin[email]'] = 'username@email.fr';
-        $form['user_as_admin[roles]'][1]->tick();
+        $form['user[username]'] = 'userEmailnotUnique';
+        $form['user[password][first]'] = 'password';
+        $form['user[password][second]'] = 'password';
+        $form['user[email]'] = 'username@email.fr';
+        $form['user[roles]'][1]->tick();
         $crawler=$this->client->submit($form);
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("Cet email est déjà utilisé.") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("Cet email est déjà utilisé.") ')->count());
     }
 
     /**
@@ -175,20 +202,20 @@ class UserControllerAsAdminTest extends WebTestCase
      */
     public function testAdminCreateAdminInvalidEmail()
     {
-        $crawler = $this->client->request('GET', '/login');
+        $crawler = $this->client->request('GET', '/users');
 
         $link = $crawler->selectLink('Créer un utilisateur')->link();
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Ajouter')->form();
-        $form['user_as_admin[username]'] = 'userAnon2';
-        $form['user_as_admin[password][first]'] = 'password';
-        $form['user_as_admin[password][second]'] = 'password';
-        $form['user_as_admin[email]'] = 'userAnon2';
-        $form['user_as_admin[roles]'][1]->tick();
+        $form['user[username]'] = 'userAnon2';
+        $form['user[password][first]'] = 'password';
+        $form['user[password][second]'] = 'password';
+        $form['user[email]'] = 'userAnon2';
+        $form['user[roles]'][1]->tick();
         $crawler=$this->client->submit($form);
 
-        static::assertSame(0, $crawler->filter('div.alert.alert-success')->count());
+        static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
         static::assertRegExp('/\/users\/create$/', $this->client->getRequest()->getUri());
     }
 
@@ -198,24 +225,48 @@ class UserControllerAsAdminTest extends WebTestCase
      */
     public function testAdminCreateAdminOK()
     {
-        $crawler = $this->client->request('GET', '/');
+        $crawler = $this->client->request('GET', '/users');
 
         $link = $crawler->selectLink('Créer un utilisateur')->link();
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Ajouter')->form();
-        $form['user_as_admin[username]'] = 'NewAdmin';
-        $form['user_as_admin[password][first]'] = 'password';
-        $form['user_as_admin[password][second]'] = 'password';
-        $form['user_as_admin[email]'] = 'NewAdmin@email.fr';
-        $form['user_as_admin[roles]'][1]->tick();
+        $form['user[username]'] = 'NewAdmin';
+        $form['user[password][first]'] = 'password';
+        $form['user[password][second]'] = 'password';
+        $form['user[email]'] = 'NewAdmin@email.fr';
+        $form['user[roles]'][1]->tick();
         $this->client->submit($form);
 
         $crawler = $this->client->followRedirect();
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("Superbe ! L\'utilisateur a bien été ajouté.") ')->count());
-        static::assertSame(1, $crawler->filter('html:contains("NewAdmin") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("Superbe ! L\'utilisateur a bien été ajouté.") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("NewAdmin") ')->count());
+
+        $crawler=$this->client->request('GET', '/login');
+
+        $form = $crawler->selectButton('Se connecter')->form();
+        $form['_username'] = 'NewAdmin';
+        $form['_password'] = 'password';
+        $this->client->submit($form);
+
+        $this->client->followRedirect();
+
+        $array = $this->client->getContainer()->get('security.token_storage')->getToken()->getUser()->getRoles();
+
+        $this->assertContains('ROLE_ADMIN', $array);
+    }
+
+    /**
+     * Test on "/users/{id}/edit" page as Admin.
+     * Test on editing an inexistant user. must failed.
+     */
+    public function testInvalidUserEdit()
+    {
+        $this->client->request('POST', '/tasks/99/edit');
+
+        static::assertEquals(404, $this->client->getResponse()->getStatusCode());
     }
 
     /**
@@ -230,10 +281,10 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[username]'] = null;
+        $form['user_edit[username]'] = null;
         $crawler=$this->client->submit($form);
 
-        static::assertSame(0, $crawler->filter('div.alert.alert-success')->count());
+        static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
         static::assertRegExp('#edit#', $this->client->getRequest()->getUri());
     }
 
@@ -249,11 +300,11 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[username]'] = 'username';
+        $form['user_edit[username]'] = 'username';
         $crawler=$this->client->submit($form);
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("Cet username est déjà utilisé.") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("Cet username est déjà utilisé.") ')->count());
     }
 
     /**
@@ -268,12 +319,12 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[password][first]'] = 'password';
-        $form['user_edit_as_admin[password][second]'] = 'password2';
+        $form['user_edit[password][first]'] = 'password';
+        $form['user_edit[password][second]'] = 'password2';
         $crawler = $this->client->submit($form);
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("Les deux mots de passe doivent correspondre.") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("Les deux mots de passe doivent correspondre.") ')->count());
     }
 
     /**
@@ -288,10 +339,10 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[email]'] = null;
+        $form['user_edit[email]'] = null;
         $crawler=$this->client->submit($form);
 
-        static::assertSame(0, $crawler->filter('div.alert.alert-success')->count());
+        static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
         static::assertRegExp('#edit#', $this->client->getRequest()->getUri());
     }
 
@@ -307,11 +358,11 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[email]'] = 'username@email.fr';
+        $form['user_edit[email]'] = 'username@email.fr';
         $crawler=$this->client->submit($form);
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("Cet email est déjà utilisé.") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("Cet email est déjà utilisé.") ')->count());
     }
 
     /**
@@ -326,10 +377,10 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[email]'] = 'useremail.fr';
+        $form['user_edit[email]'] = 'useremail.fr';
         $crawler=$this->client->submit($form);
 
-        static::assertSame(0, $crawler->filter('div.alert.alert-success')->count());
+        static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
         static::assertRegExp('#edit#', $this->client->getRequest()->getUri());
     }
 
@@ -345,14 +396,14 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[username]'] = 'NewAdmin modif';
+        $form['user_edit[username]'] = 'NewAdmin modif';
         $this->client->submit($form);
 
         $crawler = $this->client->followRedirect();
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("Superbe ! L\'utilisateur a bien été modifié") ')->count());
-        static::assertSame(1, $crawler->filter('html:contains("NewAdmin modif") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("Superbe ! L\'utilisateur a bien été modifié") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("NewAdmin modif") ')->count());
     }
 
     /**
@@ -367,14 +418,14 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[password][first]'] = 'password2';
-        $form['user_edit_as_admin[password][second]'] = 'password2';
+        $form['user_edit[password][first]'] = 'password2';
+        $form['user_edit[password][second]'] = 'password2';
         $this->client->submit($form);
 
         $crawler = $this->client->followRedirect();
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("Superbe ! L\'utilisateur a bien été modifié") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("Superbe ! L\'utilisateur a bien été modifié") ')->count());
     }
 
     /**
@@ -389,14 +440,14 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[email]'] = 'NewAdmin_modif@email.fr';
+        $form['user_edit[email]'] = 'NewAdmin_modif@email.fr';
         $this->client->submit($form);
 
         $crawler = $this->client->followRedirect();
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("Superbe ! L\'utilisateur a bien été modifié") ')->count());
-        static::assertSame(1, $crawler->filter('html:contains("NewAdmin_modif@email.fr") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("Superbe ! L\'utilisateur a bien été modifié") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("NewAdmin_modif@email.fr") ')->count());
     }
 
     /**
@@ -411,18 +462,33 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[roles]'][0]->tick();
-        $form['user_edit_as_admin[roles]'][1]->untick();
+        $form['user_edit[roles]'][0]->tick();
+        $form['user_edit[roles]'][1]->untick();
         $this->client->submit($form);
+
+        $crawler=$this->client->followRedirect();
+
+        static::assertEquals(200, $this->client->getResponse()->getStatusCode());
+        static::assertEquals(1, $crawler->filter('html:contains("Superbe ! L\'utilisateur a bien été modifié") ')->count());
+
 
         $this->client = static::createClient(array(), array(
             'PHP_AUTH_USER' => 'NewAdmin modif',
             'PHP_AUTH_PW'   => 'password2',
         ));
 
-        $crawler = $this->client->request('GET', '/users');
+        $crawler=$this->client->request('GET', '/login');
 
-        static::assertSame(1, $crawler->filter('a:contains("Edit")')->count());
+        $form = $crawler->selectButton('Se connecter')->form();
+        $form['_username'] = 'NewAdmin modif';
+        $form['_password'] = 'password2';
+        $this->client->submit($form);
+
+        $this->client->followRedirect();
+
+        $array = $this->client->getContainer()->get('security.token_storage')->getToken()->getUser()->getRoles();
+
+        $this->assertSame(['ROLE_USER'], $array);
     }
 
     /**
@@ -431,18 +497,18 @@ class UserControllerAsAdminTest extends WebTestCase
      */
     public function testAdminCreateUserUsernameAsNull()
     {
-        $crawler = $this->client->request('GET', '/login');
+        $crawler = $this->client->request('GET', '/users');
 
         $link = $crawler->selectLink('Créer un utilisateur')->link();
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Ajouter')->form();
-        $form['user_as_admin[password][first]'] = 'password';
-        $form['user_as_admin[password][second]'] = 'password';
-        $form['user_as_admin[email]'] = 'userAnon2@mail.fr';
+        $form['user[password][first]'] = 'password';
+        $form['user[password][second]'] = 'password';
+        $form['user[email]'] = 'userAnon2@mail.fr';
         $crawler=$this->client->submit($form);
 
-        static::assertSame(0, $crawler->filter('div.alert.alert-success')->count());
+        static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
         static::assertRegExp('/\/users\/create$/', $this->client->getRequest()->getUri());
     }
 
@@ -452,20 +518,41 @@ class UserControllerAsAdminTest extends WebTestCase
      */
     public function testAdminCreateUserUsernameNotUnique()
     {
-        $crawler = $this->client->request('GET', '/');
+        $crawler = $this->client->request('GET', '/users');
 
         $link = $crawler->selectLink('Créer un utilisateur')->link();
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Ajouter')->form();
-        $form['user_as_admin[username]'] = 'username';
-        $form['user_as_admin[password][first]'] = 'password';
-        $form['user_as_admin[password][second]'] = 'password';
-        $form['user_as_admin[email]'] = 'emailtest@mail.fr';
+        $form['user[username]'] = 'username';
+        $form['user[password][first]'] = 'password';
+        $form['user[password][second]'] = 'password';
+        $form['user[email]'] = 'emailtest@mail.fr';
         $crawler=$this->client->submit($form);
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("Cet username est déjà utilisé.") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("Cet username est déjà utilisé.") ')->count());
+    }
+
+    /**
+     * Test on "/users/create" page as Admin.
+     * Test on posting an user without password. must failed.
+     */
+    public function testAdminCreateUserPasswordAsNull()
+    {
+        $crawler = $this->client->request('GET', '/users');
+
+        $link = $crawler->selectLink('Créer un utilisateur')->link();
+        $crawler = $this->client->click($link);
+
+        $form = $crawler->selectButton('Ajouter')->form();
+        $form['user[username]'] = 'usertest2';
+        $form['user[email]'] = 'email3@mail.fr';
+        $form['user[roles]'][1]->tick();
+        $crawler = $this->client->submit($form);
+
+        static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
+        static::assertRegExp('/\/users\/create$/', $this->client->getRequest()->getUri());
     }
 
     /**
@@ -474,21 +561,21 @@ class UserControllerAsAdminTest extends WebTestCase
      */
     public function testAdminCreateUserPasswordError()
     {
-        $crawler = $this->client->request('GET', '/');
+        $crawler = $this->client->request('GET', '/users');
 
         $link = $crawler->selectLink('Créer un utilisateur')->link();
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Ajouter')->form();
-        $form['user_as_admin[username]'] = 'usertest2';
-        $form['user_as_admin[password][first]'] = 'password';
-        $form['user_as_admin[password][second]'] = 'password2';
-        $form['user_as_admin[email]'] = 'email3@mail.fr';
-        $form['user_as_admin[roles]'][1]->tick();
+        $form['user[username]'] = 'usertest2';
+        $form['user[password][first]'] = 'password';
+        $form['user[password][second]'] = 'password2';
+        $form['user[email]'] = 'email3@mail.fr';
+        $form['user[roles]'][1]->tick();
         $crawler = $this->client->submit($form);
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("Les deux mots de passe doivent correspondre.") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("Les deux mots de passe doivent correspondre.") ')->count());
     }
 
     /**
@@ -497,18 +584,18 @@ class UserControllerAsAdminTest extends WebTestCase
      */
     public function testAdminCreateUserEmailAsNull()
     {
-        $crawler = $this->client->request('GET', '/login');
+        $crawler = $this->client->request('GET', '/users');
 
         $link = $crawler->selectLink('Créer un utilisateur')->link();
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Ajouter')->form();
-        $form['user_as_admin[username]'] = 'userwithoutemail';
-        $form['user_as_admin[password][first]'] = 'password';
-        $form['user_as_admin[password][second]'] = 'password';
+        $form['user[username]'] = 'userwithoutemail';
+        $form['user[password][first]'] = 'password';
+        $form['user[password][second]'] = 'password';
         $crawler=$this->client->submit($form);
 
-        static::assertSame(0, $crawler->filter('div.alert.alert-success')->count());
+        static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
         static::assertRegExp('/\/users\/create$/', $this->client->getRequest()->getUri());
     }
 
@@ -518,20 +605,20 @@ class UserControllerAsAdminTest extends WebTestCase
      */
     public function testAdminCreateUserEmailNotUnique()
     {
-        $crawler = $this->client->request('GET', '/');
+        $crawler = $this->client->request('GET', '/users');
 
         $link = $crawler->selectLink('Créer un utilisateur')->link();
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Ajouter')->form();
-        $form['user_as_admin[username]'] = 'userEmailnotUnique';
-        $form['user_as_admin[password][first]'] = 'password';
-        $form['user_as_admin[password][second]'] = 'password';
-        $form['user_as_admin[email]'] = 'username@email.fr';
+        $form['user[username]'] = 'userEmailnotUnique';
+        $form['user[password][first]'] = 'password';
+        $form['user[password][second]'] = 'password';
+        $form['user[email]'] = 'username@email.fr';
         $crawler=$this->client->submit($form);
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("Cet email est déjà utilisé.") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("Cet email est déjà utilisé.") ')->count());
     }
 
     /**
@@ -540,19 +627,19 @@ class UserControllerAsAdminTest extends WebTestCase
      */
     public function testAdminCreateUserInvalidEmail()
     {
-        $crawler = $this->client->request('GET', '/login');
+        $crawler = $this->client->request('GET', '/users');
 
         $link = $crawler->selectLink('Créer un utilisateur')->link();
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Ajouter')->form();
-        $form['user_as_admin[username]'] = 'userAnon2';
-        $form['user_as_admin[password][first]'] = 'password';
-        $form['user_as_admin[password][second]'] = 'password';
-        $form['user_as_admin[email]'] = 'userAnon2';
+        $form['user[username]'] = 'userAnon2';
+        $form['user[password][first]'] = 'password';
+        $form['user[password][second]'] = 'password';
+        $form['user[email]'] = 'userAnon2';
         $crawler=$this->client->submit($form);
 
-        static::assertSame(0, $crawler->filter('div.alert.alert-success')->count());
+        static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
         static::assertRegExp('/\/users\/create$/', $this->client->getRequest()->getUri());
     }
 
@@ -562,23 +649,42 @@ class UserControllerAsAdminTest extends WebTestCase
      */
     public function testAdminCreateAsUserOK()
     {
-        $crawler = $this->client->request('GET', '/');
+        $crawler = $this->client->request('GET', '/users');
 
         $link = $crawler->selectLink('Créer un utilisateur')->link();
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Ajouter')->form();
-        $form['user_as_admin[username]'] = 'NewUser';
-        $form['user_as_admin[password][first]'] = 'password';
-        $form['user_as_admin[password][second]'] = 'password';
-        $form['user_as_admin[email]'] = 'Newuser@email.fr';
+        $form['user[username]'] = 'NewUser';
+        $form['user[password][first]'] = 'password';
+        $form['user[password][second]'] = 'password';
+        $form['user[email]'] = 'Newuser@email.fr';
         $this->client->submit($form);
 
         $crawler = $this->client->followRedirect();
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("Superbe ! L\'utilisateur a bien été ajouté.") ')->count());
-        static::assertSame(1, $crawler->filter('html:contains("NewUser") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("Superbe ! L\'utilisateur a bien été ajouté.") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("NewUser") ')->count());
+
+        $this->client = static::createClient(array(), array(
+            'PHP_AUTH_USER' => 'NewUser',
+            'PHP_AUTH_PW'   => 'password',
+        ));
+
+        $crawler=$this->client->request('GET', '/login');
+
+        $form = $crawler->selectButton('Se connecter')->form();
+        $form['_username'] = 'NewUser';
+        $form['_password'] = 'password';
+        $this->client->submit($form);
+
+        $this->client->followRedirect();
+
+        $array = $this->client->getContainer()->get('security.token_storage')->getToken()->getUser()->getRoles();
+
+        $this->assertContains('ROLE_USER', $array);
+        $this->assertNotContains('ROLE_ADMIN', $array);
     }
 
     /**
@@ -593,10 +699,10 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[username]'] = null;
+        $form['user_edit[username]'] = null;
         $crawler=$this->client->submit($form);
 
-        static::assertSame(0, $crawler->filter('div.alert.alert-success')->count());
+        static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
         static::assertRegExp('#edit#', $this->client->getRequest()->getUri());
     }
 
@@ -612,11 +718,11 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[username]'] = 'user';
+        $form['user_edit[username]'] = 'user';
         $crawler=$this->client->submit($form);
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("Cet username est déjà utilisé.") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("Cet username est déjà utilisé.") ')->count());
     }
 
     /**
@@ -631,12 +737,12 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[password][first]'] = 'password';
-        $form['user_edit_as_admin[password][second]'] = 'password2';
+        $form['user_edit[password][first]'] = 'password';
+        $form['user_edit[password][second]'] = 'password2';
         $crawler = $this->client->submit($form);
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("Les deux mots de passe doivent correspondre.") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("Les deux mots de passe doivent correspondre.") ')->count());
     }
 
     /**
@@ -651,10 +757,10 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[email]'] = null;
+        $form['user_edit[email]'] = null;
         $crawler=$this->client->submit($form);
 
-        static::assertSame(0, $crawler->filter('div.alert.alert-success')->count());
+        static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
         static::assertRegExp('#edit#', $this->client->getRequest()->getUri());
     }
 
@@ -670,11 +776,11 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[email]'] = 'user@email.fr';
+        $form['user_edit[email]'] = 'user@email.fr';
         $crawler=$this->client->submit($form);
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("Cet email est déjà utilisé.") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("Cet email est déjà utilisé.") ')->count());
     }
 
     /**
@@ -689,10 +795,10 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[email]'] = 'useremail.fr';
+        $form['user_edit[email]'] = 'useremail.fr';
         $crawler=$this->client->submit($form);
 
-        static::assertSame(0, $crawler->filter('div.alert.alert-success')->count());
+        static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
         static::assertRegExp('#edit#', $this->client->getRequest()->getUri());
     }
 
@@ -708,14 +814,14 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[username]'] = 'NewUser modif';
+        $form['user_edit[username]'] = 'NewUser modif';
         $this->client->submit($form);
 
         $crawler = $this->client->followRedirect();
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("Superbe ! L\'utilisateur a bien été modifié") ')->count());
-        static::assertSame(1, $crawler->filter('html:contains("NewUser modif") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("Superbe ! L\'utilisateur a bien été modifié") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("NewUser modif") ')->count());
     }
 
     /**
@@ -730,14 +836,14 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[password][first]'] = 'password2';
-        $form['user_edit_as_admin[password][second]'] = 'password2';
+        $form['user_edit[password][first]'] = 'password2';
+        $form['user_edit[password][second]'] = 'password2';
         $this->client->submit($form);
 
         $crawler = $this->client->followRedirect();
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("Superbe ! L\'utilisateur a bien été modifié") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("Superbe ! L\'utilisateur a bien été modifié") ')->count());
     }
 
     /**
@@ -752,14 +858,14 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[email]'] = 'NewUser_modif@email.fr';
+        $form['user_edit[email]'] = 'NewUser_modif@email.fr';
         $this->client->submit($form);
 
         $crawler = $this->client->followRedirect();
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("Superbe ! L\'utilisateur a bien été modifié") ')->count());
-        static::assertSame(1, $crawler->filter('html:contains("NewUser_modif@email.fr") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("Superbe ! L\'utilisateur a bien été modifié") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("NewUser_modif@email.fr") ')->count());
     }
 
     /**
@@ -774,17 +880,22 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[roles]'][1]->tick();
+        $form['user_edit[roles]'][1]->tick();
         $this->client->submit($form);
 
-        $this->client = static::createClient(array(), array(
-            'PHP_AUTH_USER' => 'NewUser modif',
-            'PHP_AUTH_PW'   => 'password2',
-        ));
+        $crawler=$this->client->request('GET', '/login');
 
-        $crawler = $this->client->request('GET', '/users');
+        $form = $crawler->selectButton('Se connecter')->form();
+        $form['_username'] = 'NewUser modif';
+        $form['_password'] = 'password2';
+        $this->client->submit($form);
 
-        static::assertSame(5, $crawler->filter('a:contains("Edit")')->count());
+        $crawler = $this->client->followRedirect();
+
+        $array = $this->client->getContainer()->get('security.token_storage')->getToken()->getUser()->getRoles();
+
+        static::assertEquals(1, $crawler->filter('html:contains("vos tâches sans effort")')->count());
+        $this->assertContains('ROLE_ADMIN', $array);
     }
 
     /**
@@ -799,10 +910,10 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[username]'] = null;
+        $form['user_edit[username]'] = null;
         $crawler=$this->client->submit($form);
 
-        static::assertSame(0, $crawler->filter('div.alert.alert-success')->count());
+        static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
         static::assertRegExp('#edit#', $this->client->getRequest()->getUri());
     }
 
@@ -818,11 +929,11 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[username]'] = 'user';
+        $form['user_edit[username]'] = 'user';
         $crawler=$this->client->submit($form);
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("Cet username est déjà utilisé.") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("Cet username est déjà utilisé.") ')->count());
     }
 
     /**
@@ -837,12 +948,12 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[password][first]'] = 'password';
-        $form['user_edit_as_admin[password][second]'] = 'password2';
+        $form['user_edit[password][first]'] = 'password';
+        $form['user_edit[password][second]'] = 'password2';
         $crawler = $this->client->submit($form);
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("Les deux mots de passe doivent correspondre.") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("Les deux mots de passe doivent correspondre.") ')->count());
     }
 
     /**
@@ -857,10 +968,10 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[email]'] = null;
+        $form['user_edit[email]'] = null;
         $crawler=$this->client->submit($form);
 
-        static::assertSame(0, $crawler->filter('div.alert.alert-success')->count());
+        static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
         static::assertRegExp('#edit#', $this->client->getRequest()->getUri());
     }
 
@@ -876,11 +987,11 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[email]'] = 'user@email.fr';
+        $form['user_edit[email]'] = 'user@email.fr';
         $crawler=$this->client->submit($form);
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("Cet email est déjà utilisé.") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("Cet email est déjà utilisé.") ')->count());
     }
 
     /**
@@ -895,10 +1006,10 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[email]'] = 'useremail.fr';
+        $form['user_edit[email]'] = 'useremail.fr';
         $crawler=$this->client->submit($form);
 
-        static::assertSame(0, $crawler->filter('div.alert.alert-success')->count());
+        static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
         static::assertRegExp('#edit#', $this->client->getRequest()->getUri());
     }
 
@@ -914,14 +1025,14 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[email]'] = 'admin_modif@email.fr';
+        $form['user_edit[email]'] = 'admin_modif@email.fr';
         $this->client->submit($form);
 
         $crawler = $this->client->followRedirect();
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("Superbe ! L\'utilisateur a bien été modifié") ')->count());
-        static::assertSame(1, $crawler->filter('html:contains("admin_modif@email.fr") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("Superbe ! L\'utilisateur a bien été modifié") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("admin_modif@email.fr") ')->count());
     }
 
     /**
@@ -936,7 +1047,7 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[username]'] = 'admin modif';
+        $form['user_edit[username]'] = 'admin modif';
         $this->client->submit($form);
 
         $this->client = static::createClient(array(), array(
@@ -946,7 +1057,7 @@ class UserControllerAsAdminTest extends WebTestCase
 
         $crawler = $this->client->request('GET', '/users');
 
-        static::assertSame(1, $crawler->filter('html:contains("admin modif")')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("admin modif")')->count());
     }
 
     /**
@@ -966,14 +1077,14 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[password][first]'] = 'password2';
-        $form['user_edit_as_admin[password][second]'] = 'password2';
+        $form['user_edit[password][first]'] = 'password2';
+        $form['user_edit[password][second]'] = 'password2';
         $this->client->submit($form);
 
         $crawler = $this->client->followRedirect();
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
-        static::assertSame(1, $crawler->filter('html:contains("Superbe ! L\'utilisateur a bien été modifié") ')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("Superbe ! L\'utilisateur a bien été modifié") ')->count());
     }
 
     /**
@@ -993,8 +1104,8 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit_as_admin[roles]'][0]->tick();
-        $form['user_edit_as_admin[roles]'][1]->untick();
+        $form['user_edit[roles]'][0]->tick();
+        $form['user_edit[roles]'][1]->untick();
         $this->client->submit($form);
 
         $this->client = static::createClient(array(), array(
@@ -1002,8 +1113,8 @@ class UserControllerAsAdminTest extends WebTestCase
             'PHP_AUTH_PW'   => 'password2',
         ));
 
-        $crawler = $this->client->request('GET', '/users');
+        $this->client->request('GET', '/users');
 
-        static::assertSame(1, $crawler->filter('a:contains("Edit")')->count());
+        static::assertEquals(403, $this->client->getResponse()->getStatusCode());
     }
 }
