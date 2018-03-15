@@ -53,12 +53,10 @@ class UserController extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $newPassword = $form->get('password')->getData();
-            if (!empty($newPassword)) {
-                $password = $this->get('security.password_encoder')->encodePassword($user, $user->getPassword());
-                $user->setPassword($password);
-            } else {
-                $user->setPassword($currentPassword);
-            }
+            $password=(!empty($newPassword))?
+                $this->get('security.password_encoder')->encodePassword($user, $user->getPassword()):
+                $currentPassword;
+            $user->setPassword($password);
             $this->getDoctrine()->getManager()->flush();
             $this->addFlash('success', "L'utilisateur a bien été modifié");
             return $this->redirectToRoute('user_list');

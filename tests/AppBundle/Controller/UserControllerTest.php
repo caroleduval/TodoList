@@ -244,6 +244,11 @@ class UserControllerAsAdminTest extends WebTestCase
         static::assertEquals(1, $crawler->filter('html:contains("Superbe ! L\'utilisateur a bien été ajouté.") ')->count());
         static::assertEquals(1, $crawler->filter('html:contains("NewAdmin") ')->count());
 
+        $this->client = static::createClient(array(), array(
+            'PHP_AUTH_USER' => 'NewAdmin',
+            'PHP_AUTH_PW'   => 'password',
+        ));
+
         $crawler=$this->client->request('GET', '/login');
 
         $form = $crawler->selectButton('Se connecter')->form();
