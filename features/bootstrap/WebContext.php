@@ -40,5 +40,4 @@ class WebContext extends MinkContext
 
         $row->clickLink($link);
     }
-
 }
