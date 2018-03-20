@@ -3,8 +3,9 @@
 namespace Tests\AppBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use AppBundle\Entity\Task;
-use AppBundle\Entity\User;
+use AppBundle\Command\LoadDataCommand;
+use Symfony\Bundle\FrameworkBundle\Console\Application as App;
+use Symfony\Component\Console\Tester\CommandTester;
 
 class TaskControllerAsAdminTest extends WebTestCase
 {
@@ -12,6 +13,22 @@ class TaskControllerAsAdminTest extends WebTestCase
      * @var null
      */
     private $client=null;
+
+    /**
+     * Initialize the test database before running the all tests
+     */
+    public static function setUpBeforeClass()
+    {
+        $kernel = self::createKernel();
+        $kernel->boot();
+
+        $application = new App($kernel);
+        $application->add(new LoadDataCommand());
+
+        $command = $application->find('app:initialize-TDL');
+        $commandTester = new CommandTester($command);
+        $commandTester->execute(array('command' => $command->getName()),array('-env'=>'test'));
+    }
 
     /**
      * Initialize a client to simulate the navigation

@@ -6,29 +6,25 @@ use Behat\Mink\Exception\ElementNotFoundException;
 class WebContext extends MinkContext
 {
     /**
-     * @When I wait for :arg1 seconds
+     * @BeforeSuite
      */
-    public function iWaitForSeconds($arg1)
+    public static function beforeSuite()
     {
-        $this->getSession()->wait($arg1 * 1000);
+        exec('bin/console app:initialize-TDL --env=test');
     }
 
     /**
-     * @When I scroll
+     * @Given I am connected as :username with password :password
      */
-    public function iScroll()
+    public function iAmConnectedAsWithPassword($username, $password)
     {
-        $this->getSession()->executeScript('window.scrollTo(2000,2000);');
+        $this->visit('/login');
+        $this->fillField('_username',$username);
+        $this->fillField('_password',$password);
+        $this->pressButton('Se connecter');
     }
 
     /**
-     * Looks for a table, then looks for a row that contains the given text.
-     * Once it finds the right row, it clicks a link in that row.
-     *
-     * Really handy when you have a generic "Edit" link on each row of
-     * a table, and you want to click a specific one (e.g. the "Edit" link
-     * in the row that contains "Item #2")|
-     *
      * @When /^I follow "([^"]*)" on the row containing "([^"]*)"$/
      */
     public function iClickLinkOnTheRowContaining($link, $text)
@@ -37,8 +33,6 @@ class WebContext extends MinkContext
         if (!$row) {
             throw new ElementNotFoundException($this->getSession(), 'element', 'css', $text);
         }
-
         $row->clickLink($link);
     }
-
 }

@@ -2,7 +2,10 @@
 
 namespace Tests\AppBundle\Controller;
 
+use AppBundle\Command\LoadDataCommand;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Bundle\FrameworkBundle\Console\Application as App;
+use Symfony\Component\Console\Tester\CommandTester;
 
 class UserControllerAsAdminTest extends WebTestCase
 {
@@ -10,6 +13,22 @@ class UserControllerAsAdminTest extends WebTestCase
      * @var null
      */
     private $client=null;
+
+    /**
+     * Initialize the test database before running the all tests
+     */
+    public static function setUpBeforeClass()
+    {
+        $kernel = self::createKernel();
+        $kernel->boot();
+
+        $application = new App($kernel);
+        $application->add(new LoadDataCommand());
+
+        $command = $application->find('app:initialize-TDL');
+        $commandTester = new CommandTester($command);
+        $commandTester->execute(array('command' => $command->getName()),array('-env'=>'test'));
+    }
 
     /**
      * Initialize a client to simulate the navigation
@@ -244,6 +263,11 @@ class UserControllerAsAdminTest extends WebTestCase
         static::assertEquals(1, $crawler->filter('html:contains("Superbe ! L\'utilisateur a bien été ajouté.") ')->count());
         static::assertEquals(1, $crawler->filter('html:contains("NewAdmin") ')->count());
 
+        $this->client = static::createClient(array(), array(
+            'PHP_AUTH_USER' => 'NewAdmin',
+            'PHP_AUTH_PW'   => 'password',
+        ));
+
         $crawler=$this->client->request('GET', '/login');
 
         $form = $crawler->selectButton('Se connecter')->form();
@@ -281,7 +305,7 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[username]'] = null;
+        $form['user[username]'] = null;
         $crawler=$this->client->submit($form);
 
         static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
@@ -300,7 +324,7 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[username]'] = 'username';
+        $form['user[username]'] = 'username';
         $crawler=$this->client->submit($form);
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
@@ -319,12 +343,30 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[password][first]'] = 'password';
-        $form['user_edit[password][second]'] = 'password2';
+        $form['user[password][first]'] = 'password';
+        $form['user[password][second]'] = 'password2';
         $crawler = $this->client->submit($form);
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
         static::assertEquals(1, $crawler->filter('html:contains("Les deux mots de passe doivent correspondre.") ')->count());
+    }
+
+    /**
+     * Test on "/users/{id}/edit" page.
+     * Test on editing another admin without password. must failed.
+     */
+    public function testAdminEditAdminPasswordNull()
+    {
+        $crawler = $this->client->request('GET', '/users');
+
+        $link = $crawler->selectLink('Edit')->last()->link();
+        $crawler = $this->client->click($link);
+
+        $form = $crawler->selectButton('Modifier')->form();
+        $crawler = $this->client->submit($form);
+
+        static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
+        static::assertRegExp('/edit$/', $this->client->getRequest()->getUri());
     }
 
     /**
@@ -339,7 +381,7 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[email]'] = null;
+        $form['user[email]'] = null;
         $crawler=$this->client->submit($form);
 
         static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
@@ -358,7 +400,7 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[email]'] = 'username@email.fr';
+        $form['user[email]'] = 'username@email.fr';
         $crawler=$this->client->submit($form);
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
@@ -377,7 +419,7 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[email]'] = 'useremail.fr';
+        $form['user[email]'] = 'useremail.fr';
         $crawler=$this->client->submit($form);
 
         static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
@@ -396,7 +438,7 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[username]'] = 'NewAdmin modif';
+        $form['user[username]'] = 'NewAdmin modif';
         $this->client->submit($form);
 
         $crawler = $this->client->followRedirect();
@@ -418,8 +460,8 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[password][first]'] = 'password2';
-        $form['user_edit[password][second]'] = 'password2';
+        $form['user[password][first]'] = 'password2';
+        $form['user[password][second]'] = 'password2';
         $this->client->submit($form);
 
         $crawler = $this->client->followRedirect();
@@ -440,7 +482,7 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[email]'] = 'NewAdmin_modif@email.fr';
+        $form['user[email]'] = 'NewAdmin_modif@email.fr';
         $this->client->submit($form);
 
         $crawler = $this->client->followRedirect();
@@ -462,8 +504,8 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[roles]'][0]->tick();
-        $form['user_edit[roles]'][1]->untick();
+        $form['user[roles]'][0]->tick();
+        $form['user[roles]'][1]->untick();
         $this->client->submit($form);
 
         $crawler=$this->client->followRedirect();
@@ -699,7 +741,7 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[username]'] = null;
+        $form['user[username]'] = null;
         $crawler=$this->client->submit($form);
 
         static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
@@ -718,7 +760,7 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[username]'] = 'user';
+        $form['user[username]'] = 'user';
         $crawler=$this->client->submit($form);
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
@@ -737,12 +779,30 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[password][first]'] = 'password';
-        $form['user_edit[password][second]'] = 'password2';
+        $form['user[password][first]'] = 'password';
+        $form['user[password][second]'] = 'password2';
         $crawler = $this->client->submit($form);
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
         static::assertEquals(1, $crawler->filter('html:contains("Les deux mots de passe doivent correspondre.") ')->count());
+    }
+
+    /**
+     * Test on "/users/{id}/edit" page.
+     * Test on editing an user without password. must failed.
+     */
+    public function testAdminEditUserPasswordNull()
+    {
+        $crawler = $this->client->request('GET', '/users');
+
+        $link = $crawler->selectLink('Edit')->last()->link();
+        $crawler = $this->client->click($link);
+
+        $form = $crawler->selectButton('Modifier')->form();
+        $crawler = $this->client->submit($form);
+
+        static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
+        static::assertRegExp('/edit$/', $this->client->getRequest()->getUri());
     }
 
     /**
@@ -757,7 +817,7 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[email]'] = null;
+        $form['user[email]'] = null;
         $crawler=$this->client->submit($form);
 
         static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
@@ -776,7 +836,7 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[email]'] = 'user@email.fr';
+        $form['user[email]'] = 'user@email.fr';
         $crawler=$this->client->submit($form);
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
@@ -795,7 +855,7 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[email]'] = 'useremail.fr';
+        $form['user[email]'] = 'useremail.fr';
         $crawler=$this->client->submit($form);
 
         static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
@@ -814,7 +874,7 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[username]'] = 'NewUser modif';
+        $form['user[username]'] = 'NewUser modif';
         $this->client->submit($form);
 
         $crawler = $this->client->followRedirect();
@@ -836,8 +896,8 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[password][first]'] = 'password2';
-        $form['user_edit[password][second]'] = 'password2';
+        $form['user[password][first]'] = 'password2';
+        $form['user[password][second]'] = 'password2';
         $this->client->submit($form);
 
         $crawler = $this->client->followRedirect();
@@ -858,7 +918,7 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[email]'] = 'NewUser_modif@email.fr';
+        $form['user[email]'] = 'NewUser_modif@email.fr';
         $this->client->submit($form);
 
         $crawler = $this->client->followRedirect();
@@ -880,7 +940,7 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[roles]'][1]->tick();
+        $form['user[roles]'][1]->tick();
         $this->client->submit($form);
 
         $crawler=$this->client->request('GET', '/login');
@@ -910,7 +970,7 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[username]'] = null;
+        $form['user[username]'] = null;
         $crawler=$this->client->submit($form);
 
         static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
@@ -929,7 +989,7 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[username]'] = 'user';
+        $form['user[username]'] = 'user';
         $crawler=$this->client->submit($form);
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
@@ -948,8 +1008,8 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[password][first]'] = 'password';
-        $form['user_edit[password][second]'] = 'password2';
+        $form['user[password][first]'] = 'password';
+        $form['user[password][second]'] = 'password2';
         $crawler = $this->client->submit($form);
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
@@ -968,7 +1028,7 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[email]'] = null;
+        $form['user[email]'] = null;
         $crawler=$this->client->submit($form);
 
         static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
@@ -987,7 +1047,7 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[email]'] = 'user@email.fr';
+        $form['user[email]'] = 'user@email.fr';
         $crawler=$this->client->submit($form);
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
@@ -1006,7 +1066,7 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[email]'] = 'useremail.fr';
+        $form['user[email]'] = 'useremail.fr';
         $crawler=$this->client->submit($form);
 
         static::assertEquals(0, $crawler->filter('div.alert.alert-success')->count());
@@ -1025,7 +1085,7 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[email]'] = 'admin_modif@email.fr';
+        $form['user[email]'] = 'admin_modif@email.fr';
         $this->client->submit($form);
 
         $crawler = $this->client->followRedirect();
@@ -1047,7 +1107,7 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[username]'] = 'admin modif';
+        $form['user[username]'] = 'admin modif';
         $this->client->submit($form);
 
         $this->client = static::createClient(array(), array(
@@ -1077,8 +1137,8 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[password][first]'] = 'password2';
-        $form['user_edit[password][second]'] = 'password2';
+        $form['user[password][first]'] = 'password2';
+        $form['user[password][second]'] = 'password2';
         $this->client->submit($form);
 
         $crawler = $this->client->followRedirect();
@@ -1104,8 +1164,8 @@ class UserControllerAsAdminTest extends WebTestCase
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['user_edit[roles]'][0]->tick();
-        $form['user_edit[roles]'][1]->untick();
+        $form['user[roles]'][0]->tick();
+        $form['user[roles]'][1]->untick();
         $this->client->submit($form);
 
         $this->client = static::createClient(array(), array(

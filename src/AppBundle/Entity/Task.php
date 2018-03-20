@@ -20,6 +20,7 @@ class Task
 
     /**
      * @ORM\Column(type="datetime")
+     * @Assert\DateTime()
      */
     private $createdAt;
 
@@ -42,6 +43,8 @@ class Task
 
     /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\User")
+     * @Assert\NotBlank
+     * @Assert\Valid()
      */
     private $author;
 

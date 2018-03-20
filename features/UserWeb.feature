@@ -1,56 +1,53 @@
 Feature: UserWeb
 
-  Scenario: Homepage
-    Given I am on the homepage
-    Then I should see "Créer un utilisateur"
+  Scenario: Homepage not logged
+    Given I go to the homepage
+    Then I should be on "/login"
 
-  @javascript
   Scenario: Connexion
     Given I am on "/login"
-    When I fill in "_username" with "username"
+    When I fill in "_username" with "user"
     And I fill in "Mot de passe :" with "password"
-    And I scroll
     And I press "Se connecter"
     Then I should be on the homepage
 
-  @javascript
-  Scenario: Aller sur la page de création d'un utilisateur
-    Given I am on the homepage
-    And I follow "Créer un utilisateur"
-    Then I should be on "/users/create"
+  Scenario: Aller sur la liste des utilisateurs
+    Given I am connected as "user" with password "password"
+    And I go to "/users"
+    Then the response status code should be 403
 
-  @javascript
-  Scenario: Inscription en tant que user
-    Given I am on "/users/create"
-    When I fill in "Nom d'utilisateur" with "my_username"
-    And I fill in "Mot de passe" with "password"
-    And I fill in "Tapez le mot de passe à nouveau" with "password"
-    And I fill in "Adresse email" with "myemail@mail.fr"
-    And I scroll
+  Scenario: Aller sur la liste des taches
+    Given I am connected as "user" with password "password"
+    And I follow "Consulter la liste des tâches à faire"
+    Then I should be on "/tasks/list"
+    And I should see "Liste des tâches à faire"
+
+  Scenario: Aller sur la page de création d'une tâche
+    Given I am connected as "user" with password "password"
+    And I go to "/tasks/list/0"
+    And I follow "Créer une tâche"
+    Then I should be on "/tasks/create"
+
+  Scenario: Créer une tâche
+    Given I am connected as "user" with password "password"
+    And I go to "/tasks/create"
+    When I fill in "task_title" with "titre de ma tâche"
+    And I fill in "task_content" with "description de ma tâche"
     And I press "Ajouter"
-    Then I should be on "/users"
-    And I should see "my_username"
+    Then I should be on "/tasks/list"
+    And I should see "titre de ma tâche"
 
-  @javascript
-  Scenario: Inscription en tant que admin
-    Given I am on "/users/create"
-    When I fill in "Nom d'utilisateur" with "my_username2"
-    And I fill in "Mot de passe" with "password"
-    And I fill in "Tapez le mot de passe à nouveau" with "password"
-    And I fill in "Adresse email" with "myemail2@mail.fr"
-    And I scroll
-    And I check "Administrateur"
-    And I scroll
-    And I press "Ajouter"
-    Then I should be on "/users"
-    And I should see "my_username2"
+  Scenario: Aller sur la page de modification d'une tâche
+    Given I am connected as "user" with password "password"
+    And I go to "/tasks/list/0"
+    And I follow "Finaliser le projet"
+    Then I should be on "/tasks/4/edit"
 
-
-  @javascript
-  Scenario: Modification d'un user -> admin
-    Given I am on "/users"
-    Then I follow "Edit" on the row containing "my_username"
-    And I scroll
-    And I check "Administrateur"
+  Scenario: Modifier une tâche
+    Given I am connected as "user" with password "password"
+    And I go to "/tasks/4/edit"
+    And I fill in "Description" with "description de ma tâche modifiée"
     And I press "Modifier"
-    Then I should be on "/users"
+    Then I should be on "/tasks/list"
+    And I should see "description de ma tâche modifiée"
+

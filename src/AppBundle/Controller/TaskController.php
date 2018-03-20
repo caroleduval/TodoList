@@ -3,25 +3,30 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Task;
-use AppBundle\Form\TaskType;
+use AppBundle\Form\Type\TaskType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 
 class TaskController extends Controller
 {
     /**
-     * @Route("/tasks/list/{done}", name="task_list")
+     * @Route("/tasks/list/{isDone}", name="task_list")
+     * @Method({"GET"})
+     * @Cache(smaxage="86400", public=true)
      */
-    public function listAction($done=0)
+    public function listAction($isDone=0)
     {
-        return $this->render('task/list.html.twig', ['done'=>$done,'tasks' => $this->getDoctrine()->getRepository('AppBundle:Task')->findByIsDone($done)]);
+        return $this->render('task/list.html.twig', ['isDone'=>$isDone,'tasks' => $this->getDoctrine()->getRepository('AppBundle:Task')->findByIsDone($isDone)]);
     }
 
 
     /**
      * @Route("/tasks/create", name="task_create")
+     * @Method({"GET", "POST"})
      */
     public function createAction(Request $request)
     {
@@ -47,6 +52,7 @@ class TaskController extends Controller
 
     /**
      * @Route("/tasks/{id}/edit", name="task_edit")
+     * @Method({"GET", "POST"})
      */
     public function editAction(Task $task, Request $request)
     {
@@ -70,6 +76,7 @@ class TaskController extends Controller
 
     /**
      * @Route("/tasks/{id}/toggle", name="task_toggle")
+     * @Method({"GET","POST"})
      */
     public function toggleTaskAction(Task $task)
     {
@@ -80,11 +87,12 @@ class TaskController extends Controller
 
         $this->addFlash('success', sprintf('La tâche "%s" a bien été marquée '.$message.'.', $task->getTitle()));
 
-        return $this->redirectToRoute('task_list', array('done' => $status));
+        return $this->redirectToRoute('task_list', array('isDone' => $status));
     }
 
     /**
      * @Route("/tasks/{id}/delete", name="task_delete")
+     * @Method({"GET", "DELETE"})
      * @Security("user == task.getAuthor()")
      */
     public function deleteTaskAction(Task $task)
@@ -97,6 +105,6 @@ class TaskController extends Controller
 
         $this->addFlash('success', 'La tâche a bien été supprimée.');
 
-        return $this->redirectToRoute('task_list', array('done' => $status));
+        return $this->redirectToRoute('task_list', array('isDone' => $status));
     }
 }
