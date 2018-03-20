@@ -10,7 +10,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 class LoadDataCommandTest extends KernelTestCase
 {
     /**
-     * Testing the command that loads the testing data base
+     * Testing the command that loads the testing data base and datas
      */
     public function testExecute()
     {
