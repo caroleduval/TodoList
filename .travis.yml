@@ -3,6 +3,9 @@ language: php
 php:
     - '7.1'
 
+before_script:
+  - php -S localhost:8000 httpdocs/index.php &
+  - sleep 3
 
 script:
     - composer install
