@@ -4,7 +4,7 @@ php:
     - '7.1'
 
 before_script:
-  - php -S localhost:8000 httpdocs/index.php &
+  - php -S localhost:8001 httpdocs/index.php &
   - sleep 3
 
 script:
