@@ -3,10 +3,19 @@
 namespace Tests\AppBundle\Entity;
 
 use AppBundle\Entity\User;
-use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class UserTest extends TestCase
+class UserTest extends KernelTestCase
 {
+    private $validator;
+
+    public function setUp()
+    {
+        self::bootKernel();
+
+        $this->validator = static::$kernel->getContainer()->get('validator');
+    }
+
     public function testUsername()
     {
         $user = new User();
@@ -39,5 +48,66 @@ class UserTest extends TestCase
         $this->assertSame(['ROLE_ADMIN'], $user->getRoles());
         $user->setRoles(['ROLE_USER']);
         $this->assertSame(['ROLE_USER'], $user->getRoles());
+    }
+
+    public function testValidateUsernameNull()
+    {
+        $user= new User();
+        $user->setUsername(null);
+        $user->setEmail("user@email.com");
+        $user->setPassword("password");
+        $user->setRoles(['ROLE_USER']);
+
+        $errors = $this->validator->validate($user);
+        $this->assertEquals(1, count($errors));
+    }
+
+
+    public function testValidateUsernameNotUnique()
+    {
+        $user= new User();
+        $user->setUsername("username");
+        $user->setEmail("user@email.com");
+        $user->setPassword("password");
+        $user->setRoles(['ROLE_USER']);
+
+        $errors = $this->validator->validate($user);
+        $this->assertEquals(1, count($errors));
+    }
+
+    public function testValidateEmailNull()
+    {
+        $user= new User();
+        $user->setUsername("TestUsername");
+        $user->setEmail(null);
+        $user->setPassword("password");
+        $user->setRoles(['ROLE_USER']);
+
+        $errors = $this->validator->validate($user);
+        $this->assertEquals(1, count($errors));
+    }
+
+    public function testValidateEmailNotEmail()
+    {
+        $user= new User();
+        $user->setUsername("TestUsername");
+        $user->setEmail("username@email.fr");
+        $user->setPassword("password");
+        $user->setRoles(['ROLE_USER']);
+
+        $errors = $this->validator->validate($user);
+        $this->assertEquals(1, count($errors));
+    }
+
+    public function testValidateEmailInvalide()
+    {
+        $user= new User();
+        $user->setUsername("TestUsername");
+        $user->setEmail("usernameemail.fr");
+        $user->setPassword("password");
+        $user->setRoles(['ROLE_USER']);
+
+        $errors = $this->validator->validate($user);
+        $this->assertEquals(1, count($errors));
     }
 }

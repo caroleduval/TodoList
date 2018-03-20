@@ -19,7 +19,6 @@ If you don't use it yet, please install it : [Github](https://github.com/)
        
     3. If you nedd it, you can fill the database with tests datas
        - Run : `bin/console app:initialize-TDL`
-       - open [http://localhost/snowtricks/web/app_dev.php].
        
     4. Create you own branch to work on.
     

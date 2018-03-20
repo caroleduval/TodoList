@@ -1,13 +1,13 @@
 imports:
     - { resource: config.yml }
 
-#doctrine:
-#    orm:
+doctrine:
+    orm:
+        metadata_cache_driver: apc
+        auto_generate_proxy_classes: false
 #        result_cache_driver: apc
 #        query_cache_driver: apc
 ## Lignes à ajouter pour optimiser les performances de l'application
-#        metadata_cache_driver: apc
-#        auto_generate_proxy_classes: false
 monolog:
     handlers:
         main:

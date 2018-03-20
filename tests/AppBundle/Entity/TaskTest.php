@@ -4,10 +4,27 @@ namespace Tests\AppBundle\Entity;
 
 use AppBundle\Entity\Task;
 use AppBundle\Entity\User;
-use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class TaskTest extends TestCase
+class TaskTest extends KernelTestCase
 {
+    private $validator;
+
+    private $user;
+
+    public function setUp()
+    {
+        self::bootKernel();
+
+        $this->validator = static::$kernel->getContainer()->get('validator');
+
+        $this->user = new User();
+        $this->user->setUsername("usernamefortest");
+        $this->user->setEmail("usernamefortest@email.fr");
+        $this->user->setPassword("password");
+        $this->user->setRoles(['ROLE_USER']);
+    }
+
     public function testSettingCreatedAt()
     {
         $task = new Task();
@@ -44,12 +61,69 @@ class TaskTest extends TestCase
 
     public function testSettingAuthor()
     {
-        $user = $this->createMock(User::class);
-        $user->method('getId')->willReturn('1');
-
         $task = new Task();
         static::assertSame(null, $task->getAuthor());
-        $task->setAuthor($user);
-        static::assertSame('1', $task->getAuthor()->getId());
+        $task->setAuthor($this->user);
+        static::assertSame($this->user, $task->getAuthor());
+    }
+
+    public function testValidateTitle()
+    {
+        $task= new Task();
+        $task->setTitle(null);
+        $task->setContent("content");
+        $task->setAuthor($this->user);
+
+        $errors = $this->validator->validate($task);
+        $this->assertEquals(1, count($errors));
+    }
+
+    public function testValidateContent()
+    {
+        $task= new Task();
+        $task->setTitle("titre");
+        $task->setContent(null);
+        $task->setAuthor($this->user);
+        $task->isDone(false);
+
+        $errors = $this->validator->validate($task);
+        $this->assertEquals(1, count($errors));
+    }
+
+    public function testValidateAuthor()
+    {
+        $task= new Task();
+        $task->setTitle("titre");
+        $task->setContent("content");
+        $task->setAuthor(null);
+        $task->isDone(false);
+
+        $errors = $this->validator->validate($task);
+        $this->assertEquals(1, count($errors));
+    }
+
+    public function testValidateCreatedAt()
+    {
+        $task= new Task();
+        $task->setTitle("titre");
+        $task->setContent("content");
+        $task->setAuthor($this->user);
+        $task->setCreatedAt("d day");
+        $task->isDone(false);
+
+        $errors = $this->validator->validate($task);
+        $this->assertEquals(1, count($errors));
+    }
+
+    public function testValidateisDone()
+    {
+        $task= new Task();
+        $task->setTitle("titre");
+        $task->setContent(null);
+        $task->setAuthor($this->user);
+        $task->isDone("false");
+
+        $errors = $this->validator->validate($task);
+        $this->assertEquals(1, count($errors));
     }
 }

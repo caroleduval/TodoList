@@ -2,9 +2,10 @@
 
 namespace Tests\AppBundle\Controller;
 
+use AppBundle\Command\LoadDataCommand;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use AppBundle\Entity\Task;
-use AppBundle\Entity\User;
+use Symfony\Bundle\FrameworkBundle\Console\Application as App;
+use Symfony\Component\Console\Tester\CommandTester;
 
 class TaskControllerAsUserTest extends WebTestCase
 {
@@ -12,6 +13,22 @@ class TaskControllerAsUserTest extends WebTestCase
      * @var null
      */
     private $client=null;
+
+    /**
+     * Initialize the test database before running the all tests
+     */
+    public static function setUpBeforeClass()
+    {
+        $kernel = self::createKernel();
+        $kernel->boot();
+
+        $application = new App($kernel);
+        $application->add(new LoadDataCommand());
+
+        $command = $application->find('app:initialize-TDL');
+        $commandTester = new CommandTester($command);
+        $commandTester->execute(array('command' => $command->getName()),array('-env'=>'test'));
+    }
 
     /**
      * Initialize a client to simulate the navigation
@@ -34,14 +51,14 @@ class TaskControllerAsUserTest extends WebTestCase
         $link = $crawler->selectLink('Consulter la liste des tâches à faire')->link();
         $crawler = $this->client->click($link);
 
-        static::assertEquals(3, $crawler->filter('form:contains("Marquer comme faite")')->count());
+        static::assertEquals(4, $crawler->filter('form:contains("Marquer comme faite")')->count());
         static::assertEquals(0, $crawler->filter('form:contains("Marquer non terminée")')->count());
 
         $link = $crawler->selectLink('Consulter la liste des tâches terminées')->link();
         $crawler = $this->client->click($link);
 
         static::assertEquals(0, $crawler->filter('form:contains("Marquer comme faite")')->count());
-        static::assertEquals(2, $crawler->filter('form:contains("Marquer non terminée")')->count());
+        static::assertEquals(1, $crawler->filter('form:contains("Marquer non terminée")')->count());
     }
 
     /**
@@ -127,15 +144,12 @@ class TaskControllerAsUserTest extends WebTestCase
      */
     public function testTaskEditTitleWithNullAsOwner()
     {
-        $crawler = $this->client->request('GET','tasks/create');
-        $form = $crawler->selectButton('Ajouter')->form();
-        $form['task[title]'] = 'une tâche test user';
-        $form['task[content]'] = 'description d\'une tâche';
-        $this->client->submit($form);
+        $crawler = $this->client->request('GET', '/');
 
-        $crawler = $this->client->followRedirect();
+        $link = $crawler->selectLink('Consulter la liste des tâches à faire')->link();
+        $crawler = $this->client->click($link);
 
-        $link = $crawler->selectLink('une tâche test user')->link();
+        $link = $crawler->selectLink('Passer la soutenance')->link();
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
@@ -157,19 +171,19 @@ class TaskControllerAsUserTest extends WebTestCase
         $link = $crawler->selectLink('Consulter la liste des tâches à faire')->link();
         $crawler = $this->client->click($link);
 
-        $link = $crawler->selectLink('une tâche test user')->link();
+        $link = $crawler->selectLink('Passer la soutenance')->link();
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
-        $form['task[title]'] = 'une tâche test modifiée';
+        $form['task[title]'] = 'une tâche modifiée';
         $this->client->submit($form);
 
         $crawler = $this->client->followRedirect();
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
         static::assertEquals(1, $crawler->filter('div.alert.alert-success')->count());
-        static::assertEquals(0, $crawler->filter('a:contains("une tâche test user")')->count());
-        static::assertEquals(1, $crawler->filter('html:contains("une tâche test modifiée")')->count());
+        static::assertEquals(0, $crawler->filter('a:contains("Passer la soutenance")')->count());
+        static::assertEquals(1, $crawler->filter('html:contains("une tâche modifiée")')->count());
     }
 
     /**
@@ -183,7 +197,7 @@ class TaskControllerAsUserTest extends WebTestCase
         $link = $crawler->selectLink('Consulter la liste des tâches à faire')->link();
         $crawler = $this->client->click($link);
 
-        $link = $crawler->selectLink('une tâche test modifiée')->last()->link();
+        $link = $crawler->selectLink('une tâche modifiée')->last()->link();
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
@@ -205,7 +219,7 @@ class TaskControllerAsUserTest extends WebTestCase
         $link = $crawler->selectLink('Consulter la liste des tâches à faire')->link();
         $crawler = $this->client->click($link);
 
-        $link = $crawler->selectLink('une tâche test modifiée')->last()->link();
+        $link = $crawler->selectLink('une tâche modifiée')->last()->link();
         $crawler = $this->client->click($link);
 
         $form = $crawler->selectButton('Modifier')->form();
@@ -216,7 +230,7 @@ class TaskControllerAsUserTest extends WebTestCase
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
         static::assertEquals(1, $crawler->filter('div.alert.alert-success')->count());
-        static::assertEquals(0, $crawler->filter('html:contains("description d\'une tâche")')->count());
+        static::assertEquals(0, $crawler->filter('html:contains("Détails de la tâche 5")')->count());
         static::assertEquals(1, $crawler->filter('html:contains("description modifiée")')->count());
     }
 
@@ -244,7 +258,7 @@ class TaskControllerAsUserTest extends WebTestCase
         $link = $crawler->selectLink('Consulter la liste des tâches terminées')->link();
         $crawler = $this->client->click($link);
 
-        static::assertEquals(3, $crawler->filter('form:contains("Marquer non terminée")')->count());
+        static::assertEquals(2, $crawler->filter('form:contains("Marquer non terminée")')->count());
     }
 
     /**
@@ -265,8 +279,8 @@ class TaskControllerAsUserTest extends WebTestCase
 
         static::assertEquals(200, $this->client->getResponse()->getStatusCode());
         static::assertEquals(1, $crawler->filter('html:contains("Superbe ! La tâche a bien été supprimée.")')->count());
-        static::assertEquals(0, $crawler->filter('html:contains("une tâche test modifiée")')->count());
-        static::assertEquals(2, $crawler->filter('form:contains("Marquer non terminée")')->count());
+        static::assertEquals(0, $crawler->filter('html:contains("une tâche modifiée")')->count());
+        static::assertEquals(1, $crawler->filter('form:contains("Marquer non terminée")')->count());
     }
 
     /**
@@ -388,7 +402,7 @@ class TaskControllerAsUserTest extends WebTestCase
         $link = $crawler->selectLink('Consulter la liste des tâches terminées')->link();
         $crawler = $this->client->click($link);
 
-        static::assertEquals(3, $crawler->filter('form:contains("Marquer non terminée")')->count());
+        static::assertEquals(2, $crawler->filter('form:contains("Marquer non terminée")')->count());
     }
 
     /**
@@ -414,7 +428,7 @@ class TaskControllerAsUserTest extends WebTestCase
      */
     public function testInvalidTaskEdit()
     {
-        $this->client->request('DELETE', '/tasks/99/edit');
+        $this->client->request('POST', '/tasks/99/edit');
 
         static::assertEquals(404, $this->client->getResponse()->getStatusCode());
     }

@@ -3,8 +3,20 @@
 {% block body %}
     <div class="row">
         {{ form_start(form, {'action' : path('task_edit', { 'id' : task.id })}) }}
-            {{ form_widget(form) }}
-
+        <div class="form-group">
+            {{ form_label(form.title, 'Titre') }}
+            {{ form_widget(form.title) }}
+            {% if form_errors(form.content) %}
+                <label class="error" for="content">{{ form_errors(form.content) }}</label>
+            {% endif %}
+        </div>
+        <div class="form-group">
+            {{ form_label(form.title, 'Description') }}
+            {{ form_widget(form.content) }}
+            {% if form_errors(form.content) %}
+                <label class="error" for="content">{{ form_errors(form.content) }}</label>
+            {% endif %}
+        </div>
             <button type="submit" class="btn btn-success pull-right">Modifier</button>
         {{ form_end(form) }}
     </div>

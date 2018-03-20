@@ -3,9 +3,9 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\User;
-use AppBundle\Form\UserType;
-use AppBundle\Form\UserEditType;
+use AppBundle\Form\Type\UserType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
@@ -14,6 +14,7 @@ class UserController extends Controller
 {
     /**
      * @Route("/users", name="user_list")
+     * @Method({"GET"})
      * @Cache(smaxage="86400", public=true)
      */
     public function listAction()
@@ -24,6 +25,7 @@ class UserController extends Controller
 
     /**
      * @Route("/users/create", name="user_create")
+     * @Method({"GET", "POST"})
      */
     public function createAction(Request $request)
     {
@@ -46,10 +48,11 @@ class UserController extends Controller
 
     /**
      * @Route("/users/{id}/edit", name="user_edit")
+     * @Method({"GET", "POST"})
      */
     public function editAction(User $user, Request $request)
     {
-        $form = $this->createForm(UserEditType::class, $user);
+        $form = $this->createForm(UserType::class, $user);
 
         $currentPassword = $user->getPassword();
 
