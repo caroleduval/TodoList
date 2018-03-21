@@ -9,6 +9,9 @@ use Symfony\Component\Console\Input\ArrayInput;
 
 class LoadDataCommand extends ContainerAwareCommand
 {
+    /**
+     * Configure command options
+     */
     protected function configure()
     {
         $this
@@ -18,6 +21,12 @@ class LoadDataCommand extends ContainerAwareCommand
         ;
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int|null|void
+     * @throws \Exception
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $app = $this->getApplication();

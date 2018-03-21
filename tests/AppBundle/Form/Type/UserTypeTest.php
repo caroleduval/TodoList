@@ -14,6 +14,9 @@ class UserTypeTest extends TypeTestCase
 {
     private $validator;
 
+    /**
+     * @return array
+     */
     protected function getExtensions()
     {
         $this->validator = $this->createMock(ValidatorInterface::class);
@@ -29,6 +32,9 @@ class UserTypeTest extends TypeTestCase
         );
     }
 
+    /**
+     * Test the UserType form
+     */
     public function testSubmitValidData()
     {
         $user = new User();
