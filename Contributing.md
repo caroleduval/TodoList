@@ -37,6 +37,7 @@ Please keep it in mind when working :
 **Tests are your best friends**
 * run regularly PHPUnit in order to check if everything's OK
 * Implement your own tests, code coverage mustn't decrease because of your code
+* Please don't change existing tests, ask before
     
 **Quality is in details**
 * Check your code with Quality tools (Codacy, Codeclimate, Scrutinizer)
