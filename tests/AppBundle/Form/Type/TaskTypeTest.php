@@ -9,6 +9,9 @@ use Symfony\Component\Form\Test\TypeTestCase;
 
 class TaskTypeTest extends TypeTestCase
 {
+    /**
+     * Test the TaskTypeForm
+     */
     public function testSubmitValidData()
     {
         $formData = array(

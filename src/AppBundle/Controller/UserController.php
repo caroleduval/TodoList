@@ -4,6 +4,7 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\User;
 use AppBundle\Form\Type\UserType;
+use AppBundle\Form\Type\UserEditType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -54,17 +55,15 @@ class UserController extends Controller
     {
         $form = $this->createForm(UserType::class, $user);
 
-        $currentPassword = $user->getPassword();
-
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $newPassword = $form->get('password')->getData();
-            $password=(!empty($newPassword))?
-                $this->get('security.password_encoder')->encodePassword($user, $user->getPassword()):
-                $currentPassword;
+
+            $password = $this->get('security.password_encoder')->encodePassword($user, $user->getPassword());
             $user->setPassword($password);
+
             $this->getDoctrine()->getManager()->flush();
             $this->addFlash('success', "L'utilisateur a bien été modifié");
+
             return $this->redirectToRoute('user_list');
         }
         return $this->render('user/edit.html.twig', ['form' => $form->createView(), 'user' => $user]);

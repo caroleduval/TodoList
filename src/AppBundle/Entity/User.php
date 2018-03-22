@@ -138,7 +138,7 @@ class User implements UserInterface
     }
 
     /**
-     * Non utilisée car nous ne stockons pas le mot de passe en clair
+     * Non utilisée : mot de passe non stocké en clair
      */
     public function eraseCredentials()
     {

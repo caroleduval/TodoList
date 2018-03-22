@@ -14,6 +14,9 @@ class UserTypeTest extends TypeTestCase
 {
     private $validator;
 
+    /**
+     * @return array
+     */
     protected function getExtensions()
     {
         $this->validator = $this->createMock(ValidatorInterface::class);
@@ -29,6 +32,9 @@ class UserTypeTest extends TypeTestCase
         );
     }
 
+    /**
+     * Test the UserType form
+     */
     public function testSubmitValidData()
     {
         $user = new User();
@@ -41,7 +47,7 @@ class UserTypeTest extends TypeTestCase
                 'second' => 'password',
             ),
             'email' => 'test@mail.fr',
-            'role' => ['ROLE_USER']
+            'roles' => ['ROLE_USER']
         );
 
         $form->submit($formData);
@@ -49,34 +55,12 @@ class UserTypeTest extends TypeTestCase
         $this->assertSame($user, $form->getData());
         $this->assertSame('username', $user->getUsername());
         $this->assertSame('test@mail.fr', $user->getEmail());
-//        $this->assertSame('test', $user->getPlainPassword());
 
-//        $user0=new User();
-//        $user0->setRoles(['ROLE_USER']);
-//
-//
-//        $formData = array(
-//            'username' => 'username test',
-//            'password' => 'password',
-//            'email' => 'test@mail.fr'
-//        );
-//
-//        $form = $this->factory->create(UserType::class,$user0);
-//        $form->submit($formData0);
-//        $user=new User();
-//        $user->setRoles(['ROLE_USER']);
-//        //hydrater le suer à la main
-//
-//
-//        $this->assertTrue($form->isSynchronized());
-//        $this->assertEquals($user, $user0);
-//
-//
-//        $view = $form->createView();
-//        $children = $view->children;
-//
-//        foreach (array_keys($formData) as $key) {
-//            $this->assertArrayHasKey($key, $children);
-//        }
+        $view = $form->createView();
+        $children = $view->children;
+
+        foreach (array_keys($formData) as $key) {
+            $this->assertArrayHasKey($key, $children);
+        }
     }
 }
